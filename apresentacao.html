@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Apresentação - EcoCity 2030</title>
     
-    <!-- Google Fonts (Futuristas) -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Ícones FontAwesome -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Reveal.js CSS -->
+    <!-- Reveal.js -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/black.min.css">
@@ -27,7 +27,7 @@
         
         .reveal {
             font-family: 'Rajdhani', sans-serif;
-            background: linear-gradient(135deg, #050a15, #0a1128);
+            background: linear-gradient(135deg, #02050a, #081222);
         }
         
         /* Títulos */
@@ -35,221 +35,241 @@
             font-family: 'Orbitron', sans-serif;
             text-transform: uppercase;
             letter-spacing: 2px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         .title-glow {
             color: #fff;
-            text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue), 0 0 40px var(--neon-blue);
+            text-shadow: 0 0 15px var(--neon-blue), 0 0 30px var(--neon-blue);
         }
         
-        .accent-green { 
-            color: var(--neon-green); 
-            text-shadow: 0 0 15px rgba(0, 255, 136, 0.6); 
+        .text-gradient {
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
         }
+
+        .accent-green { color: var(--neon-green); text-shadow: 0 0 20px rgba(0, 255, 136, 0.6); }
+        .accent-blue { color: var(--neon-blue); text-shadow: 0 0 20px rgba(0, 212, 255, 0.6); }
         
-        .accent-pink { color: var(--neon-pink); }
-        
-        /* Glassmorphism (Efeito Vidro) */
+        /* Efeito de Vidro Aprimorado */
         .glass-box {
-            background: rgba(10, 20, 35, 0.5);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 212, 255, 0.2);
+            background: rgba(10, 20, 35, 0.65);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 2px solid rgba(0, 212, 255, 0.3);
             border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 20px rgba(0, 212, 255, 0.05);
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(0, 212, 255, 0.08);
             text-align: left;
         }
         
         .glass-box.green-theme {
-            border-color: rgba(0, 255, 136, 0.3);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 20px rgba(0, 255, 136, 0.05);
+            border-color: rgba(0, 255, 136, 0.4);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(0, 255, 136, 0.08);
         }
 
-        /* Listas e Textos */
+        /* Textos e Listas Aumentados */
+        .reveal p { 
+            color: #e2e8f0; 
+            font-size: 38px; /* Aumentado */
+            line-height: 1.5; 
+            font-weight: 600; 
+        }
+        
         .reveal ul { list-style: none; padding: 0; margin: 0; width: 100%; }
         .reveal li { 
-            margin-bottom: 20px; font-size: 30px; color: #e0e0e0; 
-            font-weight: 500; display: flex; align-items: flex-start; 
+            margin-bottom: 30px; 
+            font-size: 34px; /* Aumentado */
+            color: #cbd5e1; 
+            font-weight: 500; 
+            display: flex; 
+            align-items: flex-start; 
         }
+        .reveal li b { color: #fff; font-weight: 700; }
         .reveal li i { 
-            color: var(--neon-blue); margin-top: 6px; margin-right: 20px; 
-            font-size: 28px; width: 40px; text-align: center; flex-shrink: 0;
+            color: var(--neon-blue); margin-top: 5px; margin-right: 25px; 
+            font-size: 34px; width: 45px; text-align: center; flex-shrink: 0;
         }
         .green-theme li i { color: var(--neon-green); }
 
-        .reveal p { color: #cccccc; font-size: 32px; line-height: 1.4; font-weight: 500; }
+        /* Grids (Organização visual) */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: stretch; }
         
-        /* Grids */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
-        
-        /* Cards de Ícones */
+        /* Cards de Ícones Aumentados */
         .icon-card {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 25px 15px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 15px;
+            padding: 30px 20px;
             text-align: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
+            transition: all 0.4s ease;
+            backdrop-filter: blur(8px);
         }
-        .icon-card i { font-size: 50px; color: var(--neon-blue); margin-bottom: 20px; display: block; }
+        .icon-card i { font-size: 65px; color: var(--neon-blue); margin-bottom: 25px; display: block; }
+        .icon-card h4 { font-size: 30px; color: #fff; margin-bottom: 15px; }
+        .icon-card p { font-size: 26px; color: #a0aec0; margin: 0; line-height: 1.4; }
+        
         .icon-card:hover { 
-            transform: translateY(-10px); 
+            transform: translateY(-15px) scale(1.02); 
             border-color: var(--neon-blue); 
-            box-shadow: 0 10px 25px rgba(0,212,255,0.2); 
-            background: rgba(0, 212, 255, 0.05);
+            box-shadow: 0 15px 35px rgba(0,212,255,0.25); 
+            background: rgba(0, 212, 255, 0.08);
         }
 
-        /* Botão Interativo Animado */
+        /* Botão Interativo Final */
         .demo-btn {
-            display: inline-block; padding: 20px 45px; margin-top: 40px;
-            background: rgba(0, 255, 136, 0.1); border: 2px solid var(--neon-green);
-            color: #fff !important; text-decoration: none; border-radius: 50px;
-            font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: 700;
-            letter-spacing: 2px; transition: all 0.3s;
+            display: inline-block; padding: 25px 60px; margin-top: 50px;
+            background: rgba(0, 255, 136, 0.15); border: 3px solid var(--neon-green);
+            color: #fff !important; text-decoration: none; border-radius: 60px;
+            font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 700;
+            letter-spacing: 3px; transition: all 0.4s;
             position: relative; overflow: hidden;
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
         }
         .demo-btn::before {
             content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
             transition: left 0.5s;
         }
         .demo-btn:hover::before { left: 100%; }
         .demo-btn:hover { 
             background: var(--neon-green); color: #000 !important; 
-            box-shadow: 0 0 30px var(--neon-green), 0 0 60px var(--neon-green); 
-            transform: scale(1.05);
+            box-shadow: 0 0 40px var(--neon-green), 0 0 80px var(--neon-green); 
+            transform: scale(1.08);
         }
 
-        /* Animações Úteis */
         .float-anim { animation: float 6s ease-in-out infinite; }
         @keyframes float {
             0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
+            50% { transform: translateY(-25px); }
             100% { transform: translateY(0px); }
         }
+        
+        .controls-hint {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            font-size: 20px; color: rgba(255,255,255,0.5); font-family: 'Rajdhani';
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%, 100% {opacity: 0.5;} 50% {opacity: 1;} }
     </style>
 </head>
 <body>
     <div class="reveal">
         <div class="slides">
             
-            <!-- Slide 1: Capa (Background de cidade High-Tech) -->
+            <!-- Slide 1: Capa -->
             <section data-background-image="https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1920&q=80" data-background-opacity="0.35" data-transition="zoom">
-                <i class="fa-solid fa-globe float-anim" style="font-size: 80px; color: #00d4ff; text-shadow: 0 0 30px #00d4ff; margin-bottom: 25px;"></i>
-                <h1 class="title-glow" style="font-size: 80px;">EcoCity <span class="accent-green">2030</span></h1>
-                <h3 style="color: #a0d4ff; letter-spacing: 6px; font-size: 26px;">O Futuro das Cidades Inteligentes</h3>
-                <div style="width: 120px; height: 3px; background: #00d4ff; margin: 30px auto; box-shadow: 0 0 10px #00d4ff;"></div>
-                <p style="text-transform: uppercase; letter-spacing: 3px; font-size: 18px; color: #88ccee;">
-                    <i class="fa-solid fa-microchip" style="margin-right: 10px;"></i> Projeto de Simulação 3D Interativa
+                <i class="fa-solid fa-globe float-anim" style="font-size: 100px; color: #00d4ff; text-shadow: 0 0 40px #00d4ff; margin-bottom: 30px;"></i>
+                <h1 class="title-glow" style="font-size: 110px;">EcoCity <span class="accent-green">2030</span></h1>
+                <h3 style="color: #a0d4ff; letter-spacing: 6px; font-size: 34px;">O Futuro das Cidades Inteligentes</h3>
+                <div style="width: 150px; height: 4px; background: #00d4ff; margin: 40px auto; box-shadow: 0 0 15px #00d4ff;"></div>
+                <p style="text-transform: uppercase; letter-spacing: 4px; font-size: 24px; color: #88ccee;">
+                    <i class="fa-solid fa-microchip" style="margin-right: 15px;"></i> Defesa de Projeto: Simulação 3D Interativa
                 </p>
+                <div class="controls-hint">Use a seta direita (→) ou Espaço para avançar</div>
             </section>
 
-            <!-- Slide 2: O Problema (Background Trânsito/Poluição) -->
-            <section data-background-image="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1920&q=80" data-background-opacity="0.2">
-                <h2 style="color: #ff4d4d; text-shadow: 0 0 15px rgba(255,0,0,0.5);">O Colapso Urbano</h2>
-                <p style="margin-bottom: 40px; font-size: 28px;">O modelo de cidade do século XX não suporta mais o futuro:</p>
+            <!-- Slide 2: O Problema -->
+            <section data-background-image="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1920&q=80" data-background-opacity="0.15">
+                <h2 style="color: #ff4d4d; text-shadow: 0 0 20px rgba(255,0,0,0.6);">O Colapso Urbano Atual</h2>
+                <p style="margin-bottom: 50px; font-size: 34px;">O modelo de infraestrutura do século XX está insustentável:</p>
                 
                 <div class="grid-2">
-                    <div class="icon-card" style="border-color: rgba(255, 77, 77, 0.3);">
+                    <div class="icon-card fragment fade-up">
                         <i class="fa-solid fa-smog" style="color: #ff4d4d;"></i>
-                        <h4 style="color: #fff; font-size: 22px;">Poluição Severa</h4>
-                        <p style="font-size: 20px;">Emissões de carbono fora de controle e perda massiva de áreas verdes.</p>
+                        <h4>Crise Ambiental</h4>
+                        <p>A OMS estima que <b>7 milhões de mortes</b> anuais estejam ligadas à severa poluição do ar nas metrópoles (NOx e CO²).</p>
                     </div>
-                    <div class="icon-card" style="border-color: rgba(255, 77, 77, 0.3);">
+                    <div class="icon-card fragment fade-up" data-fragment-index="1">
                         <i class="fa-solid fa-car-burst" style="color: #ff4d4d;"></i>
-                        <h4 style="color: #fff; font-size: 22px;">Trânsito Caótico</h4>
-                        <p style="font-size: 20px;">Sistemas ineficientes geram engarrafamentos diários e perda de tempo.</p>
+                        <h4>Paralisia Logística</h4>
+                        <p>Sistemas semafóricos arcaicos geram horas de engarrafamento diário, custando bilhões às economias locais.</p>
                     </div>
-                    <div class="icon-card" style="border-color: rgba(255, 77, 77, 0.3);">
+                    <div class="icon-card fragment fade-up" data-fragment-index="2">
                         <i class="fa-solid fa-people-group" style="color: #ff4d4d;"></i>
-                        <h4 style="color: #fff; font-size: 22px;">Superlotação</h4>
-                        <p style="font-size: 20px;">Até 2050, estimativas mostram que 68% do mundo viverá em áreas urbanas.</p>
+                        <h4>Superpopulação</h4>
+                        <p>Até 2050, <b>68% do mundo</b> viverá em áreas urbanas, exigindo o dobro de infraestrutura habitacional.</p>
                     </div>
-                    <div class="icon-card" style="border-color: rgba(255, 77, 77, 0.3);">
+                    <div class="icon-card fragment fade-up" data-fragment-index="3">
                         <i class="fa-solid fa-bolt-lightning" style="color: #ff4d4d;"></i>
-                        <h4 style="color: #fff; font-size: 22px;">Desperdício</h4>
-                        <p style="font-size: 20px;">Energia mal distribuída e iluminação pública ultrapassada e cara.</p>
+                        <h4>Déficit Energético</h4>
+                        <p>Desperdício massivo com iluminação pública ineficiente e sistemas que não se adaptam à demanda.</p>
                     </div>
                 </div>
             </section>
 
-            <!-- Slide 3: O Conceito (Background Tecnológico) -->
+            <!-- Slide 3: A Solução -->
             <section data-background-image="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1920&q=80" data-background-opacity="0.2" data-transition="slide">
-                <h2>O Paradigma <br><span class="accent-green">Smart City</span></h2>
-                <div class="glass-box green-theme" style="margin-top: 30px;">
-                    <p style="font-size: 34px; text-align: justify;">
-                        Uma Smart City (Cidade Inteligente) usa <b>Internet das Coisas (IoT)</b>, <b>Conectividade</b> e <b>Inteligência Artificial</b> para otimizar a infraestrutura urbana, proteger o meio ambiente e melhorar a vida dos cidadãos.
+                <h2 style="font-size: 70px;">O Paradigma <br><span class="text-gradient">Smart City</span></h2>
+                <div class="glass-box green-theme" style="margin-top: 40px;">
+                    <p style="text-align: justify; margin-bottom: 30px;">
+                        Uma Cidade Inteligente redefine a urbanização integrando redes <b>6G</b>, sensores ubíquos (<b>IoT</b>) e <b>Inteligência Artificial</b>. 
                     </p>
-                    <hr style="border-color: rgba(0,255,136,0.2); margin: 30px 0;">
-                    <p class="accent-pink" style="font-size: 28px; text-align: center; font-style: italic; margin-bottom: 0;">
-                        "A tecnologia torna-se invisível enquanto a eficiência se torna real."
+                    <p style="text-align: justify; font-size: 34px; color: #a0aec0;">
+                        O objetivo não é apenas instalar Wi-Fi nas praças, mas criar um <b>ecossistema autogerenciável</b> capaz de analisar big-data em tempo real para otimizar água, energia e mobilidade.
+                    </p>
+                    <hr style="border-color: rgba(0,255,136,0.3); margin: 35px 0;">
+                    <p class="accent-pink" style="font-size: 32px; text-align: center; font-style: italic; margin-bottom: 0;">
+                        "A tecnologia deve se tornar invisível, garantindo que a sustentabilidade seja automática."
                     </p>
                 </div>
             </section>
 
-            <!-- Slide 4: Nosso Projeto -->
-            <section data-auto-animate>
-                <h2 class="title-glow">O Nosso Projeto</h2>
-                <p style="margin-bottom: 40px;">O <b>EcoCity 2030</b> não é uma maquete comum. É um software.</p>
+            <!-- Slide 4: O Nosso Projeto -->
+            <section data-background-image="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920&q=80" data-background-opacity="0.15" data-auto-animate>
+                <h2 class="title-glow" style="font-size: 70px;">O Nosso Projeto</h2>
+                <p style="margin-bottom: 50px;">Apresentamos o simulador computacional <b>EcoCity 2030</b>:</p>
                 
-                <div class="grid-3">
-                    <div class="icon-card">
-                        <i class="fa-brands fa-js"></i>
-                        <h4 style="font-size: 20px;">100% Web</h4>
-                        <p style="font-size: 18px;">Desenvolvido puramente com programação web, sem depender de motores de jogos pesados.</p>
-                    </div>
-                    <div class="icon-card">
+                <div class="grid-2">
+                    <div class="icon-card fragment fade-right">
                         <i class="fa-solid fa-cube"></i>
-                        <h4 style="font-size: 20px;">Render 3D (Three.js)</h4>
-                        <p style="font-size: 18px;">Renderização em tempo real com sombras, física e clima dinâmico gerados proceduralmente.</p>
+                        <h4>Arquitetura WebGL 3D</h4>
+                        <p>Uma maquete virtual construída do absoluto zero com código (Three.js), dispensando softwares pesados. Física e iluminação calculadas dinamicamente no seu navegador.</p>
                     </div>
-                    <div class="icon-card">
-                        <i class="fa-solid fa-chart-line"></i>
-                        <h4 style="font-size: 20px;">Dados Vivos</h4>
-                        <p style="font-size: 18px;">Dashboard acoplado que monitora o trânsito, a energia e a floresta a cada milissegundo.</p>
+                    <div class="icon-card fragment fade-left">
+                        <i class="fa-solid fa-microchip"></i>
+                        <h4>Automação ao Vivo</h4>
+                        <p>Enquanto a simulação roda, um painel analítico (Dashboard) processa milhares de cálculos por segundo, gerenciando fluxo de carros autônomos e dados climáticos do ambiente.</p>
                     </div>
                 </div>
             </section>
 
             <!-- Slide 5: Mobilidade -->
             <section data-auto-animate>
-                <h2><i class="fa-solid fa-network-wired" style="margin-right: 15px; font-size: 40px;"></i> Mobilidade & IA</h2>
+                <h2 style="font-size: 65px;"><i class="fa-solid fa-network-wired" style="margin-right: 15px;"></i> Mobilidade <span class="text-gradient">Autônoma</span></h2>
                 <div class="glass-box">
+                    <p style="margin-bottom: 30px; font-size: 32px; color: #a0aec0;">A infraestrutura não depende mais do erro humano:</p>
                     <ul>
-                        <li><i class="fa-solid fa-traffic-light"></i> <div><b>Semáforos Conectados:</b> Sincronizados por IA para criar uma "onda verde" que impede paradas desnecessárias.</div></li>
-                        <li><i class="fa-solid fa-robot"></i> <div><b>Carros Autônomos:</b> Sensores calculam distâncias, evitando batidas e dispensando o motorista.</div></li>
-                        <li><i class="fa-solid fa-train"></i> <div><b>Maglev:</b> Transporte público ultrarrápido flutuante por levitação magnética.</div></li>
-                        <li><i class="fa-solid fa-helicopter"></i> <div><b>eVTOLs (Táxis Aéreos):</b> Drones de passageiros transferindo a carga do trânsito para o céu.</div></li>
+                        <li class="fragment fade-up"><i class="fa-solid fa-traffic-light"></i> <div><b>Sincronização Neural:</b> Semáforos analisam o fluxo em tempo real, gerando uma "onda verde" que suprime gargalos no trânsito.</div></li>
+                        <li class="fragment fade-up"><i class="fa-solid fa-car-on"></i> <div><b>Rede V2X (Vehicle-to-Everything):</b> Carros autônomos se comunicam com as vias via radares laser, dispensando a necessidade de motoristas e zerando batidas.</div></li>
+                        <li class="fragment fade-up"><i class="fa-solid fa-train"></i> <div><b>Trem Maglev:</b> Transporte de massa que utiliza levitação magnética. Ao remover o atrito com os trilhos, reduz o consumo de energia em 40%.</div></li>
                     </ul>
                 </div>
             </section>
 
-            <!-- Slide 6: Sustentabilidade (Background Natureza) -->
+            <!-- Slide 6: Sustentabilidade (Forestry) -->
             <section data-background-image="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=1920&q=80" data-background-opacity="0.25">
-                <h2><i class="fa-solid fa-leaf" style="color: #00ff88; margin-right: 15px;"></i> Gestão <span class="accent-green">Florestal</span></h2>
+                <h2 style="font-size: 65px;"><i class="fa-solid fa-leaf" style="color: #00ff88; margin-right: 15px;"></i> Gestão <span class="text-gradient">Florestal Ativa</span></h2>
                 <div class="glass-box green-theme">
-                    <p style="margin-bottom: 30px;">Na EcoCity 2030, a tecnologia <b>repara</b> a natureza:</p>
+                    <p style="margin-bottom: 30px;">Transformando a metrópole de concreto em um <b>pulmão verde urbano</b>:</p>
                     <ul>
-                        <li><i class="fa-solid fa-tree"></i> <div><b>Bioma Central:</b> Uma imensa estufa de vidro protegendo a flora no coração da metrópole.</div></li>
-                        <li><i class="fa-solid fa-seedling"></i> <div><b>Jardins Verticais:</b> Arranha-céus com paredes vivas para filtrar a poluição ativamente.</div></li>
-                        <li><i class="fa-solid fa-wind"></i> <div><b>Mapeamento Ativo:</b> As árvores reagem ao clima, com absorção de CO² acompanhada no painel.</div></li>
+                        <li class="fragment fade-up"><i class="fa-solid fa-tree"></i> <div><b>Bioma Central de Preservação:</b> Uma estufa botânica em hiperescala instalada no marco zero, que atua como um refúgio controlado para a flora nativa local.</div></li>
+                        <li class="fragment fade-up"><i class="fa-solid fa-building-wheat"></i> <div><b>Arquitetura Biomimética:</b> Prédios projetados como árvores. Suas fachadas integram Jardins Verticais espessos que filtram ativamente toxinas e CO² da atmosfera.</div></li>
+                        <li class="fragment fade-up"><i class="fa-solid fa-cloud-sun-rain"></i> <div><b>Mapeamento Eco-Dinâmico:</b> Sensores monitoram as folhas das árvores balançando ao vento e calculam as taxas exatas de absorção de carbono durante temporais.</div></li>
                     </ul>
                 </div>
             </section>
 
-            <!-- Slide 7: Encerramento / Call to Action -->
+            <!-- Slide 7: Call to Action -->
             <section data-transition="zoom" data-background-image="https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=1920&q=80" data-background-opacity="0.3">
-                <i class="fa-solid fa-power-off float-anim" style="font-size: 80px; color: #00ff88; text-shadow: 0 0 30px #00ff88; margin-bottom: 30px;"></i>
-                <h2>Vamos ver na prática?</h2>
-                <p style="font-size: 28px;">Chega de teoria em slides. Bem-vindos ao futuro.</p>
+                <i class="fa-solid fa-power-off float-anim" style="font-size: 100px; color: #00ff88; text-shadow: 0 0 40px #00ff88; margin-bottom: 40px;"></i>
+                <h2 style="font-size: 75px;">A teoria acabou.</h2>
+                <p style="font-size: 40px; margin-bottom: 20px;">Bem-vindos à cidade que funciona.</p>
                 
                 <a href="index.html" class="demo-btn">
-                    <i class="fa-solid fa-play" style="margin-right: 15px;"></i> Iniciar Simulação 3D
+                    <i class="fa-solid fa-play" style="margin-right: 20px;"></i> Iniciar Simulação 3D
                 </a>
             </section>
 
@@ -265,7 +285,9 @@
             progress: true,
             center: true,
             transition: 'slide', // fade/slide/convex/concave/zoom
-            backgroundTransition: 'fade' // Transição suave entre as fotos
+            backgroundTransition: 'fade', // Transição suave entre as fotos de fundo
+            fragments: true, // Ativa a animação passo a passo
+            fragmentInURL: true 
         });
     </script>
 </body>
