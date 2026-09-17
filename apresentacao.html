@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Apresentação - EcoCity 2030</title>
+    <!-- Reveal.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/night.min.css">
+    <style>
+        /* Estilos customizados para combinar com o Cyberpunk/Sci-fi da maquete */
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+            color: #00d4ff;
+            text-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+            text-transform: uppercase;
+        }
+        .reveal .accent-green { 
+            color: #00ff88; 
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.4); 
+        }
+        .reveal .accent-pink { color: #ff00d4; }
+        .reveal ul { list-style-type: square; }
+        .reveal li { margin-bottom: 15px; font-size: 32px; color: #dddddd; }
+        .reveal p { color: #cccccc; font-size: 30px; line-height: 1.5; }
+        
+        .demo-btn {
+            display: inline-block; padding: 20px 40px; margin-top: 30px;
+            background: rgba(0, 255, 136, 0.1); border: 2px solid #00ff88;
+            color: #00ff88 !important; text-decoration: none; border-radius: 10px;
+            font-size: 28px; font-weight: bold; font-family: sans-serif;
+            transition: all 0.3s;
+        }
+        .demo-btn:hover { 
+            background: #00ff88; color: #000 !important; 
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.8); 
+        }
+        .box {
+            background: rgba(255, 255, 255, 0.05); border-left: 5px solid #00d4ff;
+            padding: 20px; border-radius: 0 8px 8px 0; text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            
+            <!-- Slide 1: Capa -->
+            <section data-transition="zoom">
+                <h1>EcoCity <span class="accent-green">2030</span></h1>
+                <h3>O Futuro das Cidades Inteligentes</h3>
+                <p style="margin-top: 50px;"><small>Apresentação do Projeto</small></p>
+            </section>
+
+            <!-- Slide 2: O Problema -->
+            <section>
+                <h2>Por que precisamos mudar?</h2>
+                <div class="box">
+                    <p>O modelo atual de desenvolvimento urbano está se esgotando:</p>
+                    <ul>
+                        <li>Até 2050, <b>68%</b> da população mundial viverá em cidades.</li>
+                        <li>Trânsito caótico e infraestrutura ineficiente.</li>
+                        <li>Altas emissões de CO² e poluição severa.</li>
+                        <li>Destruição de áreas verdes para dar espaço ao concreto.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Slide 3: O Conceito -->
+            <section data-transition="slide">
+                <h2>O que é uma <br><span class="accent-green">Smart City?</span></h2>
+                <p>É uma cidade que usa <b>Tecnologia e Dados (IoT, IA)</b> para otimizar os recursos públicos, melhorar a vida dos cidadãos e proteger o meio ambiente simultaneamente.</p>
+                <p class="accent-pink"><i>Não é apenas sobre Wi-Fi na praça. É sobre eficiência invisível.</i></p>
+            </section>
+
+            <!-- Slide 4: O Nosso Projeto -->
+            <section data-transition="convex">
+                <h2>O Nosso Projeto</h2>
+                <div class="box" style="border-left-color: #00ff88;">
+                    <p>Desenvolvemos o simulador <b>EcoCity 2030</b>:</p>
+                    <ul>
+                        <li>Uma <b>maquete 3D interativa</b> programada do zero com tecnologias web (Three.js).</li>
+                        <li>Mostra na prática como a Inteligência Artificial e a natureza podem coexistir.</li>
+                        <li>Possui um painel de controle analisando a cidade em tempo real.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Slide 5: Mobilidade -->
+            <section>
+                <h2>Mobilidade & IA</h2>
+                <ul>
+                    <li><b class="accent-green">Semáforos IA:</b> Conectados e sincronizados em tempo real para zerar engarrafamentos.</li>
+                    <li><b class="accent-green">Carros Autônomos:</b> Veículos que se comunicam com a via e freiam sozinhos.</li>
+                    <li><b class="accent-green">Maglev & eVTOLs:</b> Transporte público flutuante (magnético) e táxis aéreos para desafogar as ruas.</li>
+                </ul>
+            </section>
+
+            <!-- Slide 6: Sustentabilidade (Forestry) -->
+            <section>
+                <h2>Gestão Florestal</h2>
+                <p>Na EcoCity, a tecnologia trabalha para reparar a natureza:</p>
+                <ul>
+                    <li><b>Bioma Central:</b> Uma imensa estufa de vidro protegendo uma floresta densa no coração da cidade.</li>
+                    <li><b>Jardins Verticais:</b> Fachadas de arranha-céus cobertas por flora viva.</li>
+                    <li><b>Física Real:</b> Árvores mapeadas balançando ao vento e sistema capturando CO² ativamente (visível no painel).</li>
+                </ul>
+            </section>
+
+            <!-- Slide 7: Encerramento / Call to Action -->
+            <section data-transition="zoom">
+                <h2>Vamos ver na prática?</h2>
+                <p>Chega de teoria. Bem-vindos ao futuro.</p>
+                <!-- O link aponta direto para a maquete -->
+                <a href="index.html" class="demo-btn">▶ Iniciar Simulação 3D</a>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Scripts do Reveal.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            controls: true,
+            progress: true,
+            center: true,
+            transition: 'slide' // fade/slide/convex/concave/zoom
+        });
+    </script>
+</body>
+</html>
