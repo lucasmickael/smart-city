@@ -88,6 +88,7 @@
             <div class="stat-row"><span class="stat-label">Estufa de Preservação</span><span class="stat-value" style="color:#2b8a3e">Ativa</span></div>
             <div class="stat-row"><span class="stat-label">Jardins Verticais</span><span class="stat-value">Integrados</span></div>
             <div class="stat-row"><span class="stat-label">Filtração de CO2</span><span class="stat-value" id="valCO2" style="color:#2b8a3e">145.2 t/dia</span></div>
+            <div class="stat-row"><span class="stat-label">Hortas Urbanas</span><span class="stat-value" id="valHortas" style="color:#2b8a3e">0</span></div>
         </div>
     </div>
 
@@ -137,7 +138,8 @@
     let scene, camera, renderer, controls, composer;
     let pmremGenerator, envMap;
     let clock = new THREE.Clock();
-    let cityTime = 10.0; 
+    let cityTime = 10.0;
+    let hortasCount = 0; 
     let timeSpeed = 1;
     let isNight = false;
 
@@ -470,6 +472,87 @@
         buildStreetLights(gridBlocks, startOffset, totalSpacing);
     }
 
+
+
+    function createCommunityGarden() {
+        const group = new THREE.Group();
+        
+        const groundMat = new THREE.MeshStandardMaterial({color: 0x4a3b2c, roughness: 1.0});
+        const ground = new THREE.Mesh(new THREE.BoxGeometry(BS-2, 0.2, BS-2), groundMat);
+        ground.position.y = 0.1;
+        ground.receiveShadow = true;
+        group.add(ground);
+
+        const shedMat = new THREE.MeshStandardMaterial({color: 0x7a4b3a, roughness: 0.9});
+        const shed = new THREE.Mesh(new THREE.BoxGeometry(4, 3, 4), shedMat);
+        shed.position.set(-(BS/2) + 4, 1.5, -(BS/2) + 4);
+        shed.castShadow = true;
+        group.add(shed);
+        const shedRoof = new THREE.Mesh(new THREE.ConeGeometry(3.5, 1.5, 4), new THREE.MeshStandardMaterial({color: 0x333333}));
+        shedRoof.rotation.y = Math.PI/4;
+        shedRoof.position.set(-(BS/2) + 4, 3.75, -(BS/2) + 4);
+        group.add(shedRoof);
+
+        const woodMat = new THREE.MeshStandardMaterial({color: 0x8b7355, roughness: 0.9});
+        const soilMat = new THREE.MeshStandardMaterial({color: 0x2e1d13, roughness: 1.0}); 
+        const plantMats = [
+            new THREE.MeshStandardMaterial({color: 0x4caf50}), 
+            new THREE.MeshStandardMaterial({color: 0x2e7d32}), 
+            new THREE.MeshStandardMaterial({color: 0x8bc34a}),
+            new THREE.MeshStandardMaterial({color: 0xe53935})
+        ];
+
+        for(let i=0; i<3; i++) {
+            for(let j=0; j<3; j++) {
+                const px = -4 + i*7;
+                const pz = -2 + j*6;
+                
+                if (i===0 && j===0) continue; 
+                
+                const bed = new THREE.Mesh(new THREE.BoxGeometry(5, 0.5, 4), woodMat);
+                bed.position.set(px, 0.25, pz);
+                bed.castShadow = true;
+                group.add(bed);
+                
+                const soil = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.55, 3.8), soilMat);
+                soil.position.set(px, 0.25, pz);
+                group.add(soil);
+                
+                const plantMat = plantMats[Math.floor(Math.random()*plantMats.length)];
+                for(let r=-1.5; r<=1.5; r+=1.5) {
+                    for(let c=-1; c<=1; c+=1) {
+                        if (Math.random() > 0.8) continue;
+                        const pGeo = Math.random() > 0.5 ? new THREE.SphereGeometry(0.35, 5, 5) : new THREE.ConeGeometry(0.3, 0.7, 5);
+                        const plant = new THREE.Mesh(pGeo, plantMat);
+                        plant.position.set(px + r, 0.6, pz + c);
+                        plant.castShadow = true;
+                        group.add(plant);
+                    }
+                }
+            }
+        }
+        
+        const bushMat = new THREE.MeshStandardMaterial({color: 0x3a5f0b, roughness: 1.0});
+        for(let x=-(BS/2)+1; x<=(BS/2)-1; x+=3) {
+            const bush1 = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1, 1), bushMat);
+            bush1.position.set(x, 0.5, -(BS/2)+0.5);
+            group.add(bush1);
+            
+            const bush2 = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1, 1), bushMat);
+            bush2.position.set(x, 0.5, (BS/2)-0.5);
+            group.add(bush2);
+            
+            const bush3 = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 2.5), bushMat);
+            bush3.position.set(-(BS/2)+0.5, 0.5, x);
+            if(x > -(BS/2)+3) group.add(bush3);
+            
+            const bush4 = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 2.5), bushMat);
+            bush4.position.set((BS/2)-0.5, 0.5, x);
+            group.add(bush4);
+        }
+
+        return group;
+    }
 
     function createHouse() {
         const group = new THREE.Group();
