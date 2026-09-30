@@ -26,7 +26,7 @@
         .stat-label { color: #555; font-weight: 500;}
         .stat-value { color: #111; font-weight: 600; font-variant-numeric: tabular-nums; font-family: monospace; font-size: 13px;}
         
-        #camera-control { top: 375px; left: 20px; padding: 15px; width: 280px; }
+        #camera-control { top: 440px; left: 20px; padding: 15px; width: 280px; }
         #camera-control .btn-group { flex-direction: column; gap: 8px; }
 
         #time-control { top: 20px; right: 20px; padding: 15px; width: 220px; text-align: center; }
@@ -68,16 +68,17 @@
         <div class="stat-group">
             <div class="stat-title">🚘 Mobilidade Urbana</div>
             <div class="stat-row"><span class="stat-label">Cidadãos na Via</span><span class="stat-value" style="color:#d9480f">150</span></div>
-            <div class="stat-row"><span class="stat-label">Ciclistas (Micro-Mobilidade)</span><span class="stat-value" id="valBikes" style="color:#2b8a3e">0</span></div>
-            <div class="stat-row"><span class="stat-label">Carros Elétricos Conectados</span><span class="stat-value" id="valCars">45</span></div>
+            <div class="stat-row"><span class="stat-label">Ciclistas (Micromobilidade)</span><span class="stat-value" id="valBikes" style="color:#2b8a3e">0</span></div>
+            <div class="stat-row"><span class="stat-label">Carros Elétricos V2X</span><span class="stat-value" id="valCars">45</span></div>
             <div class="stat-row"><span class="stat-label">Monotrilho / VLT</span><span class="stat-value" style="color:#007799">Operante</span></div>
         </div>
 
         <div class="stat-group">
-            <div class="stat-title">🏢 Infraestrutura & Serviços</div>
-            <div class="stat-row"><span class="stat-label">Semáforos Inteligentes</span><span class="stat-value" style="color:#2b8a3e">Sincronizados</span></div>
-            <div class="stat-row"><span class="stat-label">Cobertura IoT (Sensores)</span><span class="stat-value" style="color:#007799">99.8%</span></div>
-            <div class="stat-row"><span class="stat-label">Energia Eólica (Gerada)</span><span class="stat-value" style="color:#2b8a3e" id="valEnergy">42.5 MW</span></div>
+            <div class="stat-title">🏢 Infraestrutura Primária</div>
+            <div class="stat-row"><span class="stat-label">Hospital Central</span><span class="stat-value" style="color:#e03131">100% Ativo</span></div>
+            <div class="stat-row"><span class="stat-label">Eco Mercado</span><span class="stat-value" style="color:#2b8a3e">Abastecido</span></div>
+            <div class="stat-row"><span class="stat-label">Semáforos Conectados</span><span class="stat-value" style="color:#2b8a3e">Sincronizados</span></div>
+            <div class="stat-row"><span class="stat-label">Geradores Eólicos</span><span class="stat-value" style="color:#007799" id="valEnergy">42.5 MW</span></div>
         </div>
 
         <div class="stat-group">
@@ -133,16 +134,14 @@
     let scene, camera, renderer, controls, composer;
     let pmremGenerator, envMap;
     let clock = new THREE.Clock();
-    let cityTime = 10.0; // Inicia de manhã
+    let cityTime = 10.0; 
     let timeSpeed = 1;
     let isNight = false;
 
-    // Variáveis da Câmera
     let activeCamera = 'free';
     let savedFreeCam = { pos: new THREE.Vector3(130, 90, 160), target: new THREE.Vector3(0,0,0) };
     let myUberCar = null;
 
-    // Arrays de Entidades
     const cars = [];
     const cyclists = [];
     const turbines = [];
@@ -310,6 +309,7 @@
     const mats = {};
 
     function generateTexturesAndMaterials() {
+        // Vias
         const roadCnv = document.createElement('canvas');
         roadCnv.width = 512; roadCnv.height = 512;
         const rctx = roadCnv.getContext('2d');
@@ -344,6 +344,30 @@
         }
         textures.crosswalk = new THREE.CanvasTexture(crossCnv);
 
+        // Placa Mercado
+        const mktCnv = document.createElement('canvas');
+        mktCnv.width = 512; mktCnv.height = 128;
+        const mCtx = mktCnv.getContext('2d');
+        mCtx.fillStyle = '#ffffff'; mCtx.fillRect(0,0,512,128);
+        mCtx.fillStyle = '#4CAF50'; mCtx.fillRect(0,110,512,18); 
+        mCtx.fillStyle = '#333333'; mCtx.font = "bold 60px sans-serif";
+        mCtx.textAlign = "center"; mCtx.fillText("ECO MERCADO", 256, 80);
+        textures.market = new THREE.CanvasTexture(mktCnv);
+
+        // Placa Outdoor Cidade
+        const outCnv = document.createElement('canvas');
+        outCnv.width = 1024; outCnv.height = 512;
+        const oCtx = outCnv.getContext('2d');
+        oCtx.fillStyle = '#112233'; oCtx.fillRect(0,0,1024,512); 
+        oCtx.fillStyle = '#00bcd4'; oCtx.fillRect(20,20,984,472); 
+        oCtx.fillStyle = '#112233'; oCtx.fillRect(40,40,944,432); 
+        oCtx.fillStyle = '#ffffff'; oCtx.font = "bold 100px sans-serif";
+        oCtx.textAlign = "center"; oCtx.fillText("HORIZONTE", 512, 240);
+        oCtx.fillStyle = '#00bcd4'; oCtx.font = "bold 120px sans-serif"; oCtx.fillText("CIANO", 512, 360);
+        oCtx.font = "bold 30px sans-serif"; oCtx.fillStyle = '#aaaaaa'; oCtx.fillText("C I D A D E   I N T E L I G E N T E", 512, 440);
+        textures.outdoor = new THREE.CanvasTexture(outCnv);
+
+        // Fachadas de Prédios
         textures.windows = [];
         for (let t=0; t<3; t++) {
             const wCnv = document.createElement('canvas');
@@ -370,9 +394,10 @@
         mats.concrete = new THREE.MeshStandardMaterial({ color: 0xdcdcdc, roughness: 0.8 });
         mats.darkConcrete = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.7 });
         mats.ecoWall = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 1.0 }); 
-        
-        // Ciclovia avermelhada
         mats.bikeLane = new THREE.MeshStandardMaterial({ color: 0xba3c3c, roughness: 0.9 });
+        
+        mats.marketSign = new THREE.MeshStandardMaterial({map: textures.market, roughness: 0.5});
+        mats.outdoor = new THREE.MeshStandardMaterial({map: textures.outdoor, roughness: 0.2});
 
         mats.buildings = textures.windows.map(tex => {
             const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.3, metalness: 0.6, envMap: envMap, envMapIntensity: 1.0 });
@@ -395,7 +420,7 @@
                 const cx = startOffset + i * totalSpacing;
                 const cz = startOffset + j * totalSpacing;
 
-                buildBlock(cx, cz);
+                buildBlock(cx, cz, i, j);
 
                 const crossX = cx + BS/2 + RW/2;
                 const crossZ = cz + BS/2 + RW/2;
@@ -403,7 +428,7 @@
                 cross.rotation.x = -Math.PI/2; cross.position.set(crossX, 0.01, crossZ);
                 cross.receiveShadow = true; scene.add(cross);
 
-                // Semáforos Inteligentes
+                // Semáforos
                 const lightG = new THREE.Group();
                 lightG.position.set(crossX, 2.5, crossZ);
                 const lMatH = new THREE.MeshBasicMaterial({color: 0x00ff00, side: THREE.DoubleSide});
@@ -447,10 +472,11 @@
         buildStreetLights(gridBlocks, startOffset, totalSpacing);
     }
 
-    function buildBlock(cx, cz) {
+    function buildBlock(cx, cz, i, j) {
         const sidewalk = new THREE.Mesh(new THREE.BoxGeometry(BS, 0.2, BS), mats.sidewalk);
         sidewalk.position.set(cx, 0.1, cz); sidewalk.receiveShadow = true; scene.add(sidewalk);
 
+        // Bloco do Parque Central e Letreiro Outdoor
         if (Math.abs(cx) < 5 && Math.abs(cz) < 5) {
             const park = new THREE.Mesh(new THREE.BoxGeometry(BS, 0.25, BS), mats.grass);
             park.position.set(cx, 0.125, cz); park.receiveShadow = true; scene.add(park);
@@ -476,6 +502,35 @@
                 tree.position.set(cx + Math.cos(ang)*r, 0.25, cz + Math.sin(ang)*r);
                 scene.add(tree);
             }
+            
+            // Outdoor "Horizonte Ciano"
+            const billboardGroup = new THREE.Group();
+            const poleMat = new THREE.MeshStandardMaterial({color: 0x555555, metalness: 0.6});
+            const p1 = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 8), poleMat); p1.position.set(-6, 4, 0); billboardGroup.add(p1);
+            const p2 = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 8), poleMat); p2.position.set(6, 4, 0); billboardGroup.add(p2);
+            
+            const board = new THREE.Mesh(new THREE.BoxGeometry(16, 8, 0.6), mats.outdoor);
+            board.position.set(0, 8, 0); billboardGroup.add(board);
+            
+            billboardGroup.position.set(cx, 0, cz + BS/2 - 1.5); // Beira do parque
+            scene.add(billboardGroup);
+
+            return;
+        }
+
+        // Bloco do Hospital Central
+        if (i === 1 && j === 4) {
+            const hosp = createHospital();
+            hosp.position.set(cx, 0.2, cz);
+            scene.add(hosp);
+            return;
+        }
+
+        // Bloco do Mercado
+        if (i === 4 && j === 1) {
+            const mkt = createMarket();
+            mkt.position.set(cx, 0.2, cz);
+            scene.add(mkt);
             return;
         }
 
@@ -505,6 +560,69 @@
                 scene.add(bldg);
             }
         }
+    }
+
+    function createHospital() {
+        const group = new THREE.Group();
+        const matBase = new THREE.MeshStandardMaterial({color: 0xf0f5ff, roughness: 0.3});
+        const matTower = mats.buildings[1]; // Vidros azuis
+        
+        // Pronto Socorro (Base Larga)
+        const base = new THREE.Mesh(new THREE.BoxGeometry(22, 10, 22), matBase);
+        base.position.y = 5; base.castShadow = true; base.receiveShadow = true; group.add(base);
+        
+        // Torre dos Leitos
+        const tower = new THREE.Mesh(new THREE.BoxGeometry(14, 40, 14), matTower);
+        tower.position.y = 10 + 20; tower.castShadow = true; tower.receiveShadow = true; group.add(tower);
+        
+        // Heliponto
+        const padMat = new THREE.MeshStandardMaterial({color: 0x333333});
+        const pad = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 0.5, 16), padMat);
+        pad.position.y = 50.25; group.add(pad);
+        
+        const hLine = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.6, 0.5), new THREE.MeshBasicMaterial({color: 0xffffff}));
+        hLine.position.y = 50.25; group.add(hLine);
+        const vLine1 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 2.5), new THREE.MeshBasicMaterial({color: 0xffffff}));
+        vLine1.position.set(-1, 50.25, 0); group.add(vLine1);
+        const vLine2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 2.5), new THREE.MeshBasicMaterial({color: 0xffffff}));
+        vLine2.position.set(1, 50.25, 0); group.add(vLine2);
+        
+        // Cruz Vermelha Neon (Fachada)
+        const crossMat = new THREE.MeshStandardMaterial({color: 0xff1111, emissive: 0xff1111, emissiveIntensity: 1.0});
+        const cv = new THREE.Mesh(new THREE.BoxGeometry(1.5, 5, 0.5), crossMat);
+        const ch = new THREE.Mesh(new THREE.BoxGeometry(5, 1.5, 0.5), crossMat);
+        
+        const crossGroup1 = new THREE.Group(); crossGroup1.add(cv.clone(), ch.clone()); crossGroup1.position.set(0, 42, 7.1);
+        const crossGroup2 = new THREE.Group(); crossGroup2.add(cv.clone(), ch.clone()); crossGroup2.position.set(0, 42, -7.1);
+        group.add(crossGroup1, crossGroup2);
+        
+        return group;
+    }
+
+    function createMarket() {
+        const group = new THREE.Group();
+        const matWall = new THREE.MeshStandardMaterial({color: 0xdcdcdc, roughness: 0.8});
+        
+        // Estrutura Principal
+        const store = new THREE.Mesh(new THREE.BoxGeometry(24, 10, 18), matWall);
+        store.position.set(0, 5, -3); store.castShadow = true; store.receiveShadow = true; group.add(store);
+        
+        // Placa "Eco Mercado"
+        const signFront = new THREE.Mesh(new THREE.BoxGeometry(16, 4, 0.5), mats.marketSign);
+        signFront.position.set(0, 7.5, 6.1); group.add(signFront);
+        
+        // Telhado Verde Ecológico
+        const roof = new THREE.Mesh(new THREE.BoxGeometry(24.4, 0.5, 18.4), mats.grass);
+        roof.position.set(0, 10.25, -3); group.add(roof);
+
+        // Painéis Solares
+        const solarMat = new THREE.MeshStandardMaterial({color: 0x223355, metalness:0.8, roughness:0.2});
+        for(let x=-8; x<=8; x+=4) {
+            const sp = new THREE.Mesh(new THREE.BoxGeometry(3, 0.2, 8), solarMat);
+            sp.position.set(x, 10.6, -3); sp.rotation.x = -0.2; sp.castShadow = true; group.add(sp);
+        }
+        
+        return group;
     }
 
     function createArchitecturalBuilding(w, d, h) {
@@ -559,10 +677,7 @@
         cl2.position.set(0.5, 2.5, -0.5); cl2.castShadow = true; group.add(cl2);
         group.scale.setScalar(0.7 + Math.random()*0.6);
         
-        leaves.push(
-            { mesh: cl1, ox: 0, oy: 2, oz: 0 },
-            { mesh: cl2, ox: 0.5, oy: 2.5, oz: -0.5 }
-        );
+        leaves.push({ mesh: cl1, ox: 0, oy: 2, oz: 0 }, { mesh: cl2, ox: 0.5, oy: 2.5, oz: -0.5 });
         return group;
     }
 
@@ -698,13 +813,10 @@
 
     function createCyclist() {
         const group = new THREE.Group();
-        
-        // Quadro
         const frameMat = new THREE.MeshStandardMaterial({color: 0x444444, metalness: 0.8, roughness: 0.2});
         const frame = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 1.1), frameMat);
         frame.position.y = 0.5; frame.castShadow = true; group.add(frame);
         
-        // Rodas (giratórias no eixo X em relação ao modelo)
         const wheelMat = new THREE.MeshStandardMaterial({color: 0x111111, roughness: 0.9});
         const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.05, 12);
         wheelGeo.rotateZ(Math.PI/2);
@@ -715,7 +827,6 @@
         const bw = new THREE.Mesh(wheelGeo, wheelMat);
         bw.position.set(0, 0.35, 0.6); bw.castShadow = true; group.add(bw);
 
-        // Ciclista
         const rider = new THREE.Group();
         const colors = [0x2266cc, 0xcc2222, 0x22cc66, 0xddaa22];
         const skinColors = [0xffccaa, 0x8d5524, 0xc68642, 0xe0ac69, 0xf1c27d];
@@ -724,7 +835,7 @@
         const matHead = new THREE.MeshStandardMaterial({color: skinColors[Math.floor(Math.random()*skinColors.length)], roughness: 0.8});
         
         const torso = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.4, 0.2), matShirt);
-        torso.position.set(0, 0.9, -0.1); torso.rotation.x = -0.3; // Inclinado na bicicleta
+        torso.position.set(0, 0.9, -0.1); torso.rotation.x = -0.3; 
         torso.castShadow = true; rider.add(torso);
         
         const head = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.18), matHead);
@@ -736,7 +847,7 @@
     }
 
     function spawnCyclists() {
-        const lanes = [-3.4, 3.4]; // Posição das ciclovias
+        const lanes = [-3.4, 3.4]; 
         for (let i = -2; i <= 2; i++) {
             const roadPos = i * (BS + RW);
             
@@ -823,9 +934,6 @@
         btn.classList.add('active');
     }
 
-    // ============================================================
-    // LOOP PRINCIPAL 
-    // ============================================================
     function animate() {
         requestAnimationFrame(animate);
         const delta = clock.getDelta() * timeSpeed;
@@ -849,7 +957,6 @@
             sl.v.color.setHex(vColor);
         });
 
-        // Carros
         cars.forEach(c => {
             let targetSpeed = c.userData.maxSpeed;
             let approachingRed = false;
@@ -895,7 +1002,6 @@
             }
         });
 
-        // Ciclistas (Mesma lógica de andar)
         cyclists.forEach(c => {
             let targetSpeed = 6.0; 
             let approachingRed = false;
@@ -907,7 +1013,7 @@
                         ? Math.ceil((c.position.x + 0.1) / spacing) * spacing 
                         : Math.floor((c.position.x - 0.1) / spacing) * spacing;
                     const dist = (nextCross - c.position.x) * c.userData.dir;
-                    if (dist > 2 && dist < 8) approachingRed = true; // Param para freio de bike
+                    if (dist > 2 && dist < 8) approachingRed = true; 
                 }
             } else {
                 if (vStop) {
@@ -935,13 +1041,11 @@
                 if(c.position.z < -c.userData.limit) c.position.z = c.userData.limit;
             }
 
-            // Anima as rodas 
             const wheelRot = (c.userData.speed * delta) / 0.35;
             c.userData.fw.rotation.x -= wheelRot;
             c.userData.bw.rotation.x -= wheelRot;
         });
 
-        // Pedestres
         peds.forEach(p => {
             const move = p.userData.speed * delta * p.userData.dir;
             
@@ -965,7 +1069,6 @@
             p.position.y = Math.abs(Math.sin(p.userData.walkCycle * 2)) * 0.05; 
         });
 
-        // Vento
         leaves.forEach(l => {
             const sway = Math.sin(cityTime * 2 + l.mesh.parent.position.x * 0.1) * 0.1;
             l.mesh.position.x = l.ox + sway;
