@@ -26,7 +26,7 @@
         .stat-label { color: #555; font-weight: 500;}
         .stat-value { color: #111; font-weight: 600; font-variant-numeric: tabular-nums; font-family: monospace; font-size: 13px;}
         
-        #camera-control { top: 440px; left: 20px; padding: 15px; width: 280px; }
+        #camera-control { top: 460px; left: 20px; padding: 15px; width: 280px; }
         #camera-control .btn-group { flex-direction: column; gap: 8px; }
 
         #time-control { top: 20px; right: 20px; padding: 15px; width: 220px; text-align: center; }
@@ -37,6 +37,7 @@
             flex: 1; background: #f0f0f0; border: 1px solid #ccc;
             color: #333; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 11px; transition: 0.2s;
         }
+        .btn-block { width: 100%; margin-top: 6px; font-weight: 600; }
         .btn:hover { background: #e0e0e0; }
         .btn.active { background: #007799; color: #fff; border-color: #007799; }
         .btn-rain { background: #e8f4f8; border-color: #007799; color: #007799; margin-top: 10px; width: 100%; font-weight: 600;}
@@ -75,9 +76,10 @@
 
         <div class="stat-group">
             <div class="stat-title">🏢 Infraestrutura Primária</div>
+            <div class="stat-row"><span class="stat-label">Aeroporto Internacional</span><span class="stat-value" style="color:#007799">Voos Ativos</span></div>
             <div class="stat-row"><span class="stat-label">Hospital Central</span><span class="stat-value" style="color:#e03131">100% Ativo</span></div>
             <div class="stat-row"><span class="stat-label">Eco Mercado</span><span class="stat-value" style="color:#2b8a3e">Abastecido</span></div>
-            <div class="stat-row"><span class="stat-label">Semáforos Conectados</span><span class="stat-value" style="color:#2b8a3e">Sincronizados</span></div>
+            <div class="stat-row"><span class="stat-label">Semáforos Inteligentes</span><span class="stat-value" style="color:#2b8a3e">Sincronizados</span></div>
             <div class="stat-row"><span class="stat-label">Geradores Eólicos</span><span class="stat-value" style="color:#007799" id="valEnergy">42.5 MW</span></div>
         </div>
 
@@ -98,6 +100,7 @@
             <button class="btn" id="camCar">🚕 Bordo de Veículo</button>
             <button class="btn" id="camStreet">🚶 Nível da Rua</button>
         </div>
+        <button class="btn btn-block" id="camPlane" style="background:#d0e5f0; color:#005577; border-color:#007799;">✈️ Acompanhar Avião</button>
     </div>
 
     <div id="time-control" class="panel">
@@ -152,6 +155,7 @@
     const leaves = []; 
     
     let monorailTrain;
+    let flyingPlane;
     let rainSystem, rainGeo;
     let isRaining = false;
 
@@ -168,14 +172,14 @@
 
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB);
-        scene.fog = new THREE.FogExp2(0x87CEEB, 0.002);
+        scene.fog = new THREE.FogExp2(0x87CEEB, 0.0015);
 
         pmremGenerator = new THREE.PMREMGenerator(renderer);
         pmremGenerator.compileEquirectangularShader();
         envMap = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
         scene.environment = envMap;
 
-        camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 1, 1000);
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 1, 1500);
         camera.position.copy(savedFreeCam.pos);
 
         controls = new OrbitControls(camera, renderer.domElement);
@@ -183,7 +187,7 @@
         controls.dampingFactor = 0.05;
         controls.maxPolarAngle = Math.PI / 2.05;
         controls.minDistance = 10;
-        controls.maxDistance = 400;
+        controls.maxDistance = 600;
         controls.target.copy(savedFreeCam.target);
 
         const renderScene = new RenderPass(scene, camera);
@@ -203,6 +207,7 @@
         spawnPedestrians();
         buildWindTurbines();
         buildMonorailSystem();
+        buildAirport();
         buildWeather(); 
 
         document.getElementById('btnPause').onclick = (e) => setSpeed(0, e.target);
@@ -221,6 +226,7 @@
         document.getElementById('camTrain').onclick = () => setCameraMode('train', 'camTrain');
         document.getElementById('camCar').onclick = () => setCameraMode('car', 'camCar');
         document.getElementById('camStreet').onclick = () => setCameraMode('street', 'camStreet');
+        document.getElementById('camPlane').onclick = () => setCameraMode('plane', 'camPlane');
 
         window.addEventListener('resize', onResize);
         setTimeout(() => document.getElementById('loading').classList.add('hidden'), 500);
@@ -232,9 +238,9 @@
         rainGeo = new THREE.BufferGeometry();
         const rainPos = new Float32Array(rainCount * 3);
         for(let i=0; i<rainCount; i++) {
-            rainPos[i*3] = (Math.random() - 0.5) * CS * 1.5;
+            rainPos[i*3] = (Math.random() - 0.5) * CS * 2;
             rainPos[i*3+1] = Math.random() * 200;
-            rainPos[i*3+2] = (Math.random() - 0.5) * CS * 1.5;
+            rainPos[i*3+2] = (Math.random() - 0.5) * CS * 2;
         }
         rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos, 3));
         const rainMat = new THREE.PointsMaterial({ color: 0x88ccff, size: 0.3, transparent: true, opacity: 0.5 });
@@ -257,22 +263,19 @@
         controls.maxPolarAngle = Math.PI / 2.05;
         controls.minPolarAngle = 0;
         controls.minDistance = 10;
-        controls.maxDistance = 400;
+        controls.maxDistance = 600;
         document.getElementById('controls-hint').style.display = 'block';
 
         if (mode === 'free') {
             camera.position.copy(savedFreeCam.pos);
             controls.target.copy(savedFreeCam.target);
         } else if (mode === 'sat') {
-            camera.position.set(0, 250, 1);
+            camera.position.set(0, 350, 1);
             controls.target.set(0, 0, 0);
-        } else if (mode === 'train') {
+        } else if (mode === 'train' || mode === 'car' || mode === 'plane') {
             controls.enabled = false;
             document.getElementById('controls-hint').style.display = 'none';
-        } else if (mode === 'car') {
-            myUberCar = cars[Math.floor(Math.random() * cars.length)];
-            controls.enabled = false;
-            document.getElementById('controls-hint').style.display = 'none';
+            if (mode === 'car') myUberCar = cars[Math.floor(Math.random() * cars.length)];
         } else if (mode === 'street') {
             camera.position.set(22, 1.8, 22);
             controls.target.set(0, 1.8, 0);
@@ -294,8 +297,8 @@
         sunLight.shadow.mapSize.width = 2048;
         sunLight.shadow.mapSize.height = 2048;
         sunLight.shadow.camera.near = 10;
-        sunLight.shadow.camera.far = 400;
-        const d = 150;
+        sunLight.shadow.camera.far = 600;
+        const d = 250;
         sunLight.shadow.camera.left = -d;
         sunLight.shadow.camera.right = d;
         sunLight.shadow.camera.top = d;
@@ -309,7 +312,6 @@
     const mats = {};
 
     function generateTexturesAndMaterials() {
-        // Vias
         const roadCnv = document.createElement('canvas');
         roadCnv.width = 512; roadCnv.height = 512;
         const rctx = roadCnv.getContext('2d');
@@ -344,7 +346,6 @@
         }
         textures.crosswalk = new THREE.CanvasTexture(crossCnv);
 
-        // Placa Mercado
         const mktCnv = document.createElement('canvas');
         mktCnv.width = 512; mktCnv.height = 128;
         const mCtx = mktCnv.getContext('2d');
@@ -354,7 +355,6 @@
         mCtx.textAlign = "center"; mCtx.fillText("ECO MERCADO", 256, 80);
         textures.market = new THREE.CanvasTexture(mktCnv);
 
-        // Placa Outdoor Cidade
         const outCnv = document.createElement('canvas');
         outCnv.width = 1024; outCnv.height = 512;
         const oCtx = outCnv.getContext('2d');
@@ -367,7 +367,6 @@
         oCtx.font = "bold 30px sans-serif"; oCtx.fillStyle = '#aaaaaa'; oCtx.fillText("C I D A D E   I N T E L I G E N T E", 512, 440);
         textures.outdoor = new THREE.CanvasTexture(outCnv);
 
-        // Fachadas de Prédios
         textures.windows = [];
         for (let t=0; t<3; t++) {
             const wCnv = document.createElement('canvas');
@@ -407,7 +406,8 @@
     }
 
     function buildCity() {
-        const ground = new THREE.Mesh(new THREE.PlaneGeometry(CS*1.5, CS*1.5), mats.grass);
+        // Terreno expandido para caber o aeroporto ao fundo
+        const ground = new THREE.Mesh(new THREE.PlaneGeometry(CS*3.0, CS*3.0), mats.grass);
         ground.rotation.x = -Math.PI/2; ground.receiveShadow = true;
         scene.add(ground);
 
@@ -428,7 +428,6 @@
                 cross.rotation.x = -Math.PI/2; cross.position.set(crossX, 0.01, crossZ);
                 cross.receiveShadow = true; scene.add(cross);
 
-                // Semáforos
                 const lightG = new THREE.Group();
                 lightG.position.set(crossX, 2.5, crossZ);
                 const lMatH = new THREE.MeshBasicMaterial({color: 0x00ff00, side: THREE.DoubleSide});
@@ -441,7 +440,6 @@
                 smartLights.push({h: lMatH, v: lMatV});
             }
             
-            // Ruas e Ciclovias
             const roadZ = startOffset + i * totalSpacing + BS/2 + RW/2;
             const hRoad = new THREE.Mesh(new THREE.PlaneGeometry(CS, RW), mats.asphaltHoriz);
             hRoad.rotation.x = -Math.PI/2; hRoad.position.set(0, 0.005, roadZ);
@@ -476,7 +474,6 @@
         const sidewalk = new THREE.Mesh(new THREE.BoxGeometry(BS, 0.2, BS), mats.sidewalk);
         sidewalk.position.set(cx, 0.1, cz); sidewalk.receiveShadow = true; scene.add(sidewalk);
 
-        // Bloco do Parque Central e Letreiro Outdoor
         if (Math.abs(cx) < 5 && Math.abs(cz) < 5) {
             const park = new THREE.Mesh(new THREE.BoxGeometry(BS, 0.25, BS), mats.grass);
             park.position.set(cx, 0.125, cz); park.receiveShadow = true; scene.add(park);
@@ -503,7 +500,6 @@
                 scene.add(tree);
             }
             
-            // Outdoor "Horizonte Ciano"
             const billboardGroup = new THREE.Group();
             const poleMat = new THREE.MeshStandardMaterial({color: 0x555555, metalness: 0.6});
             const p1 = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 8), poleMat); p1.position.set(-6, 4, 0); billboardGroup.add(p1);
@@ -512,13 +508,12 @@
             const board = new THREE.Mesh(new THREE.BoxGeometry(16, 8, 0.6), mats.outdoor);
             board.position.set(0, 8, 0); billboardGroup.add(board);
             
-            billboardGroup.position.set(cx, 0, cz + BS/2 - 1.5); // Beira do parque
+            billboardGroup.position.set(cx, 0, cz + BS/2 - 1.5); 
             scene.add(billboardGroup);
 
             return;
         }
 
-        // Bloco do Hospital Central
         if (i === 1 && j === 4) {
             const hosp = createHospital();
             hosp.position.set(cx, 0.2, cz);
@@ -526,7 +521,6 @@
             return;
         }
 
-        // Bloco do Mercado
         if (i === 4 && j === 1) {
             const mkt = createMarket();
             mkt.position.set(cx, 0.2, cz);
@@ -562,20 +556,142 @@
         }
     }
 
+    // ============================================
+    // NOVO: AEROPORTO INTERNACIONAL E AVIÕES
+    // ============================================
+    function buildAirport() {
+        const airportGroup = new THREE.Group();
+        // Posicionado atrás da cidade (fundo Z)
+        airportGroup.position.set(0, 0, -200);
+
+        // Pista de Pouso/Decolagem
+        const runwayMat = new THREE.MeshStandardMaterial({color: 0x222222, roughness: 0.9});
+        const runway = new THREE.Mesh(new THREE.PlaneGeometry(400, 30), runwayMat);
+        runway.rotation.x = -Math.PI/2;
+        runway.position.set(0, 0.05, -35);
+        runway.receiveShadow = true;
+        airportGroup.add(runway);
+
+        // Linhas pontilhadas da pista
+        const lineMat = new THREE.MeshBasicMaterial({color: 0xffffff});
+        for(let i = -180; i <= 180; i += 20) {
+            const dash = new THREE.Mesh(new THREE.PlaneGeometry(10, 1.2), lineMat);
+            dash.rotation.x = -Math.PI/2;
+            dash.position.set(i, 0.08, -35);
+            airportGroup.add(dash);
+        }
+
+        // Terminal Principal
+        const termMat = new THREE.MeshStandardMaterial({color: 0xe0e0e0, roughness: 0.2});
+        const glassMat = new THREE.MeshPhysicalMaterial({color: 0x88ccff, transmission: 0.8, opacity: 0.8, transparent: true, roughness: 0.1});
+        
+        const terminal = new THREE.Mesh(new THREE.BoxGeometry(120, 12, 25), termMat);
+        terminal.position.set(0, 6, 10);
+        terminal.castShadow = true;
+        airportGroup.add(terminal);
+        
+        const terminalGlass = new THREE.Mesh(new THREE.BoxGeometry(118, 9, 25.5), glassMat);
+        terminalGlass.position.set(0, 6, 10);
+        airportGroup.add(terminalGlass);
+
+        // Torre de Controle
+        const towerPillar = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 4.0, 45, 16), termMat);
+        towerPillar.position.set(-70, 22.5, 10);
+        towerPillar.castShadow = true;
+        airportGroup.add(towerPillar);
+        
+        const towerTop = new THREE.Mesh(new THREE.CylinderGeometry(6.5, 4.5, 8, 16), glassMat);
+        towerTop.position.set(-70, 49, 10);
+        airportGroup.add(towerTop);
+        
+        const towerRoof = new THREE.Mesh(new THREE.CylinderGeometry(6.8, 6.8, 1, 16), termMat);
+        towerRoof.position.set(-70, 53.5, 10);
+        airportGroup.add(towerRoof);
+
+        // Aviões Estacionados e Jetbridges
+        for(let x = -40; x <= 40; x += 40) {
+            const plane = createAirplane();
+            plane.position.set(x, 2.8, -8);
+            plane.rotation.y = Math.PI; // Virado para a pista (fundo)
+            airportGroup.add(plane);
+            
+            const bridge = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 10), termMat);
+            bridge.position.set(x - 3, 5, 4);
+            bridge.rotation.y = -0.3;
+            airportGroup.add(bridge);
+        }
+
+        scene.add(airportGroup);
+
+        // Avião Voando Eteramente
+        flyingPlane = createAirplane();
+        scene.add(flyingPlane);
+        // radius 250, height 100
+        flyingPlane.userData = { angle: 0, radius: 240, height: 120, speed: 0.4 };
+    }
+
+    function createAirplane() {
+        const group = new THREE.Group();
+        const matBody = new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.3});
+        const matWing = new THREE.MeshStandardMaterial({color: 0xcccccc, roughness: 0.4});
+        const matGlass = new THREE.MeshStandardMaterial({color: 0x112233, roughness: 0.1});
+        const matTail = new THREE.MeshStandardMaterial({color: 0x00bcd4, roughness: 0.4}); // Cauda Ciano
+
+        // Fuselagem (virado pro eixo Z-)
+        const bodyGeo = new THREE.CylinderGeometry(2, 2, 20, 16);
+        bodyGeo.rotateX(Math.PI/2);
+        const body = new THREE.Mesh(bodyGeo, matBody);
+        body.castShadow = true; group.add(body);
+
+        // Bico do Avião
+        const nose = new THREE.Mesh(new THREE.SphereGeometry(2, 16, 16), matBody);
+        nose.position.set(0, 0, -10); group.add(nose);
+        
+        // Cabine do Piloto
+        const cockpit = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.2, 3), matGlass);
+        cockpit.position.set(0, 1.4, -8);
+        cockpit.rotation.x = Math.PI/8; group.add(cockpit);
+
+        // Cauda Traseira
+        const tailCone = new THREE.Mesh(new THREE.SphereGeometry(2, 16, 16), matBody);
+        tailCone.scale.set(1, 1, 2.5);
+        tailCone.position.set(0, 0, 10); group.add(tailCone);
+
+        // Asas Principais
+        const wings = new THREE.Mesh(new THREE.BoxGeometry(28, 0.4, 5), matWing);
+        wings.position.set(0, -0.6, -1); wings.castShadow = true; group.add(wings);
+
+        // Asas Traseiras (Estabilizador)
+        const tailWings = new THREE.Mesh(new THREE.BoxGeometry(9, 0.3, 3), matWing);
+        tailWings.position.set(0, -0.2, 11); group.add(tailWings);
+
+        // Cauda Vertical
+        const vTail = new THREE.Mesh(new THREE.BoxGeometry(0.4, 5.5, 4), matTail);
+        vTail.position.set(0, 2.5, 11);
+        vTail.rotation.x = -Math.PI/8; group.add(vTail);
+
+        // Turbinas
+        const engineMat = new THREE.MeshStandardMaterial({color: 0x444444});
+        const engGeo = new THREE.CylinderGeometry(0.9, 0.9, 3.5, 12);
+        engGeo.rotateX(Math.PI/2);
+        const e1 = new THREE.Mesh(engGeo, engineMat); e1.position.set(-6, -1.6, -1); group.add(e1);
+        const e2 = new THREE.Mesh(engGeo, engineMat); e2.position.set(6, -1.6, -1); group.add(e2);
+
+        return group;
+    }
+    // ============================================
+
     function createHospital() {
         const group = new THREE.Group();
         const matBase = new THREE.MeshStandardMaterial({color: 0xf0f5ff, roughness: 0.3});
-        const matTower = mats.buildings[1]; // Vidros azuis
+        const matTower = mats.buildings[1]; 
         
-        // Pronto Socorro (Base Larga)
         const base = new THREE.Mesh(new THREE.BoxGeometry(22, 10, 22), matBase);
         base.position.y = 5; base.castShadow = true; base.receiveShadow = true; group.add(base);
         
-        // Torre dos Leitos
         const tower = new THREE.Mesh(new THREE.BoxGeometry(14, 40, 14), matTower);
         tower.position.y = 10 + 20; tower.castShadow = true; tower.receiveShadow = true; group.add(tower);
         
-        // Heliponto
         const padMat = new THREE.MeshStandardMaterial({color: 0x333333});
         const pad = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 0.5, 16), padMat);
         pad.position.y = 50.25; group.add(pad);
@@ -587,7 +703,6 @@
         const vLine2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 2.5), new THREE.MeshBasicMaterial({color: 0xffffff}));
         vLine2.position.set(1, 50.25, 0); group.add(vLine2);
         
-        // Cruz Vermelha Neon (Fachada)
         const crossMat = new THREE.MeshStandardMaterial({color: 0xff1111, emissive: 0xff1111, emissiveIntensity: 1.0});
         const cv = new THREE.Mesh(new THREE.BoxGeometry(1.5, 5, 0.5), crossMat);
         const ch = new THREE.Mesh(new THREE.BoxGeometry(5, 1.5, 0.5), crossMat);
@@ -603,19 +718,15 @@
         const group = new THREE.Group();
         const matWall = new THREE.MeshStandardMaterial({color: 0xdcdcdc, roughness: 0.8});
         
-        // Estrutura Principal
         const store = new THREE.Mesh(new THREE.BoxGeometry(24, 10, 18), matWall);
         store.position.set(0, 5, -3); store.castShadow = true; store.receiveShadow = true; group.add(store);
         
-        // Placa "Eco Mercado"
         const signFront = new THREE.Mesh(new THREE.BoxGeometry(16, 4, 0.5), mats.marketSign);
         signFront.position.set(0, 7.5, 6.1); group.add(signFront);
         
-        // Telhado Verde Ecológico
         const roof = new THREE.Mesh(new THREE.BoxGeometry(24.4, 0.5, 18.4), mats.grass);
         roof.position.set(0, 10.25, -3); group.add(roof);
 
-        // Painéis Solares
         const solarMat = new THREE.MeshStandardMaterial({color: 0x223355, metalness:0.8, roughness:0.2});
         for(let x=-8; x<=8; x+=4) {
             const sp = new THREE.Mesh(new THREE.BoxGeometry(3, 0.2, 8), solarMat);
@@ -809,41 +920,6 @@
                 scene.add(g); peds.push(g);
             }
         }
-    }
-
-    function createCyclist() {
-        const group = new THREE.Group();
-        const frameMat = new THREE.MeshStandardMaterial({color: 0x444444, metalness: 0.8, roughness: 0.2});
-        const frame = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 1.1), frameMat);
-        frame.position.y = 0.5; frame.castShadow = true; group.add(frame);
-        
-        const wheelMat = new THREE.MeshStandardMaterial({color: 0x111111, roughness: 0.9});
-        const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.05, 12);
-        wheelGeo.rotateZ(Math.PI/2);
-        
-        const fw = new THREE.Mesh(wheelGeo, wheelMat);
-        fw.position.set(0, 0.35, -0.6); fw.castShadow = true; group.add(fw);
-        
-        const bw = new THREE.Mesh(wheelGeo, wheelMat);
-        bw.position.set(0, 0.35, 0.6); bw.castShadow = true; group.add(bw);
-
-        const rider = new THREE.Group();
-        const colors = [0x2266cc, 0xcc2222, 0x22cc66, 0xddaa22];
-        const skinColors = [0xffccaa, 0x8d5524, 0xc68642, 0xe0ac69, 0xf1c27d];
-        
-        const matShirt = new THREE.MeshStandardMaterial({color: colors[Math.floor(Math.random()*colors.length)], roughness: 0.9});
-        const matHead = new THREE.MeshStandardMaterial({color: skinColors[Math.floor(Math.random()*skinColors.length)], roughness: 0.8});
-        
-        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.4, 0.2), matShirt);
-        torso.position.set(0, 0.9, -0.1); torso.rotation.x = -0.3; 
-        torso.castShadow = true; rider.add(torso);
-        
-        const head = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.18), matHead);
-        head.position.set(0, 1.15, -0.2); head.castShadow = true; rider.add(head);
-        
-        group.add(rider);
-        group.userData = { fw, bw };
-        return group;
     }
 
     function spawnCyclists() {
@@ -1080,6 +1156,21 @@
             monorailTrain.position.x = monorailTrain.userData.pos;
         }
 
+        // Animação do Avião
+        if (flyingPlane) {
+            flyingPlane.userData.angle += delta * flyingPlane.userData.speed;
+            const a = flyingPlane.userData.angle;
+            const r = flyingPlane.userData.radius;
+            const px = Math.cos(a) * r;
+            const pz = Math.sin(a) * r;
+            
+            flyingPlane.position.set(px, flyingPlane.userData.height, pz);
+            
+            const nextA = a + 0.05;
+            flyingPlane.lookAt(Math.cos(nextA)*r, flyingPlane.userData.height, Math.sin(nextA)*r);
+            flyingPlane.rotateZ(Math.PI/8); 
+        }
+
         turbines.forEach(t => t.rotation.z -= 1.5 * delta);
 
         if(isRaining && rainSystem) {
@@ -1110,6 +1201,11 @@
                 camera.position.set(cx, cy + 1.0, cz + dir * -0.5);
                 camera.lookAt(cx, cy + 0.8, cz + dir * 10);
             }
+        } else if (activeCamera === 'plane' && flyingPlane) {
+            const relativeCameraOffset = new THREE.Vector3(0, 10, 45); 
+            const cameraOffset = relativeCameraOffset.applyMatrix4(flyingPlane.matrixWorld);
+            camera.position.copy(cameraOffset);
+            camera.lookAt(flyingPlane.position);
         } else {
             controls.update(); 
         }
