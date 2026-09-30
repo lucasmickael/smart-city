@@ -922,6 +922,41 @@
         }
     }
 
+    function createCyclist() {
+        const group = new THREE.Group();
+        const frameMat = new THREE.MeshStandardMaterial({color: 0x444444, metalness: 0.8, roughness: 0.2});
+        const frame = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 1.1), frameMat);
+        frame.position.y = 0.5; frame.castShadow = true; group.add(frame);
+        
+        const wheelMat = new THREE.MeshStandardMaterial({color: 0x111111, roughness: 0.9});
+        const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.05, 12);
+        wheelGeo.rotateZ(Math.PI/2);
+        
+        const fw = new THREE.Mesh(wheelGeo, wheelMat);
+        fw.position.set(0, 0.35, -0.6); fw.castShadow = true; group.add(fw);
+        
+        const bw = new THREE.Mesh(wheelGeo, wheelMat);
+        bw.position.set(0, 0.35, 0.6); bw.castShadow = true; group.add(bw);
+
+        const rider = new THREE.Group();
+        const colors = [0x2266cc, 0xcc2222, 0x22cc66, 0xddaa22];
+        const skinColors = [0xffccaa, 0x8d5524, 0xc68642, 0xe0ac69, 0xf1c27d];
+        
+        const matShirt = new THREE.MeshStandardMaterial({color: colors[Math.floor(Math.random()*colors.length)], roughness: 0.9});
+        const matHead = new THREE.MeshStandardMaterial({color: skinColors[Math.floor(Math.random()*skinColors.length)], roughness: 0.8});
+        
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.4, 0.2), matShirt);
+        torso.position.set(0, 0.9, -0.1); torso.rotation.x = -0.3; 
+        torso.castShadow = true; rider.add(torso);
+        
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.18), matHead);
+        head.position.set(0, 1.15, -0.2); head.castShadow = true; rider.add(head);
+        
+        group.add(rider);
+        group.userData = { fw, bw };
+        return group;
+    }
+
     function spawnCyclists() {
         const lanes = [-3.4, 3.4]; 
         for (let i = -2; i <= 2; i++) {
