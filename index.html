@@ -26,7 +26,7 @@
         .stat-label { color: #555; font-weight: 500;}
         .stat-value { color: #111; font-weight: 600; font-variant-numeric: tabular-nums; font-family: monospace; font-size: 13px;}
         
-        #camera-control { top: 350px; left: 20px; padding: 15px; width: 280px; }
+        #camera-control { top: 375px; left: 20px; padding: 15px; width: 280px; }
         #camera-control .btn-group { flex-direction: column; gap: 8px; }
 
         #time-control { top: 20px; right: 20px; padding: 15px; width: 220px; text-align: center; }
@@ -68,6 +68,7 @@
         <div class="stat-group">
             <div class="stat-title">🚘 Mobilidade Urbana</div>
             <div class="stat-row"><span class="stat-label">Cidadãos na Via</span><span class="stat-value" style="color:#d9480f">150</span></div>
+            <div class="stat-row"><span class="stat-label">Ciclistas (Micro-Mobilidade)</span><span class="stat-value" id="valBikes" style="color:#2b8a3e">0</span></div>
             <div class="stat-row"><span class="stat-label">Carros Elétricos Conectados</span><span class="stat-value" id="valCars">45</span></div>
             <div class="stat-row"><span class="stat-label">Monotrilho / VLT</span><span class="stat-value" style="color:#007799">Operante</span></div>
         </div>
@@ -111,15 +112,6 @@
 
     <div id="controls-hint">🖱️ ARRASTAR: Girar • 🖱️ SCROLL: Zoom • 🖱️ DIREITO: Mover</div>
 
-    <script>
-        window.onerror = function(message, source, lineno, colno, error) {
-            const loadingPanel = document.getElementById('loading');
-            loadingPanel.classList.remove('hidden');
-            loadingPanel.innerHTML = '<p style="color:#d9480f; text-transform:none; font-size:14px;"><b>Erro Encontrado:</b><br>' + message + '<br>Linha: ' + lineno + '</p>';
-            return true;
-        };
-    </script>
-
     <script type="importmap">
     { "imports": {
         "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
@@ -141,7 +133,7 @@
     let scene, camera, renderer, controls, composer;
     let pmremGenerator, envMap;
     let clock = new THREE.Clock();
-    let cityTime = 10.0; // Inicia de manhã (luz do dia, clima limpo, realista)
+    let cityTime = 10.0; // Inicia de manhã
     let timeSpeed = 1;
     let isNight = false;
 
@@ -152,6 +144,7 @@
 
     // Arrays de Entidades
     const cars = [];
+    const cyclists = [];
     const turbines = [];
     const streetLights = [];
     const windowMaterials = [];
@@ -195,7 +188,6 @@
         controls.target.copy(savedFreeCam.target);
 
         const renderScene = new RenderPass(scene, camera);
-        // Bloom reduzido severamente para evitar aspecto "Sci-Fi" neon e dar um tom solar natural
         const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.3, 0.5, 0.9);
         const outputPass = new OutputPass();
 
@@ -208,6 +200,7 @@
         generateTexturesAndMaterials();
         buildCity();
         spawnCars();
+        spawnCyclists();
         spawnPedestrians();
         buildWindTurbines();
         buildMonorailSystem();
@@ -320,7 +313,7 @@
         const roadCnv = document.createElement('canvas');
         roadCnv.width = 512; roadCnv.height = 512;
         const rctx = roadCnv.getContext('2d');
-        rctx.fillStyle = '#444'; rctx.fillRect(0,0,512,512); // Asfalto mais claro (realista)
+        rctx.fillStyle = '#444'; rctx.fillRect(0,0,512,512); 
         for(let i=0; i<15000; i++){
             rctx.fillStyle = Math.random()>0.5 ? '#4a4a4a':'#3d3d3d';
             rctx.fillRect(Math.random()*512, Math.random()*512, 2, 2);
@@ -356,7 +349,7 @@
             const wCnv = document.createElement('canvas');
             wCnv.width = 512; wCnv.height = 512;
             const wctx = wCnv.getContext('2d');
-            wctx.fillStyle = ['#aaaaab', '#8899aa', '#99aab3'][t]; wctx.fillRect(0,0,512,512); // Cores de vidro diurno
+            wctx.fillStyle = ['#aaaaab', '#8899aa', '#99aab3'][t]; wctx.fillRect(0,0,512,512); 
             for (let y = 16; y < 512; y += 64) {
                 for (let x = 16; x < 512; x += 48) {
                     wctx.fillStyle = Math.random() > 0.8 ? '#ffffff' : '#778899';
@@ -373,11 +366,13 @@
         mats.asphaltHoriz = new THREE.MeshStandardMaterial({ map: textures.roadHoriz, roughness: 0.9, metalness: 0.1 });
         mats.asphaltCross = new THREE.MeshStandardMaterial({ map: textures.crosswalk, roughness: 0.9, metalness: 0.1 });
         mats.sidewalk = new THREE.MeshStandardMaterial({ color: 0xbbbbbb, roughness: 0.9 });
-        mats.grass = new THREE.MeshStandardMaterial({ color: 0x4CAF50, roughness: 1.0 }); // Grama verde viva
+        mats.grass = new THREE.MeshStandardMaterial({ color: 0x4CAF50, roughness: 1.0 }); 
         mats.concrete = new THREE.MeshStandardMaterial({ color: 0xdcdcdc, roughness: 0.8 });
         mats.darkConcrete = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.7 });
+        mats.ecoWall = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 1.0 }); 
         
-        mats.ecoWall = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 1.0 }); // Verde floresta para jardim vertical
+        // Ciclovia avermelhada
+        mats.bikeLane = new THREE.MeshStandardMaterial({ color: 0xba3c3c, roughness: 0.9 });
 
         mats.buildings = textures.windows.map(tex => {
             const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.3, metalness: 0.6, envMap: envMap, envMapIntensity: 1.0 });
@@ -408,7 +403,7 @@
                 cross.rotation.x = -Math.PI/2; cross.position.set(crossX, 0.01, crossZ);
                 cross.receiveShadow = true; scene.add(cross);
 
-                // Semáforos Inteligentes Modernos (Design realista)
+                // Semáforos Inteligentes
                 const lightG = new THREE.Group();
                 lightG.position.set(crossX, 2.5, crossZ);
                 const lMatH = new THREE.MeshBasicMaterial({color: 0x00ff00, side: THREE.DoubleSide});
@@ -421,13 +416,32 @@
                 smartLights.push({h: lMatH, v: lMatV});
             }
             
+            // Ruas e Ciclovias
+            const roadZ = startOffset + i * totalSpacing + BS/2 + RW/2;
             const hRoad = new THREE.Mesh(new THREE.PlaneGeometry(CS, RW), mats.asphaltHoriz);
-            hRoad.rotation.x = -Math.PI/2; hRoad.position.set(0, 0.005, startOffset + i * totalSpacing + BS/2 + RW/2);
+            hRoad.rotation.x = -Math.PI/2; hRoad.position.set(0, 0.005, roadZ);
             hRoad.receiveShadow = true; scene.add(hRoad);
             
+            const hBike1 = new THREE.Mesh(new THREE.PlaneGeometry(CS, 1.2), mats.bikeLane);
+            hBike1.rotation.x = -Math.PI/2; hBike1.position.set(0, 0.008, roadZ - 3.4);
+            hBike1.receiveShadow = true; scene.add(hBike1);
+
+            const hBike2 = new THREE.Mesh(new THREE.PlaneGeometry(CS, 1.2), mats.bikeLane);
+            hBike2.rotation.x = -Math.PI/2; hBike2.position.set(0, 0.008, roadZ + 3.4);
+            hBike2.receiveShadow = true; scene.add(hBike2);
+            
+            const roadX = startOffset + i * totalSpacing + BS/2 + RW/2;
             const vRoad = new THREE.Mesh(new THREE.PlaneGeometry(RW, CS), mats.asphaltVert);
-            vRoad.rotation.x = -Math.PI/2; vRoad.position.set(startOffset + i * totalSpacing + BS/2 + RW/2, 0.006, 0);
+            vRoad.rotation.x = -Math.PI/2; vRoad.position.set(roadX, 0.006, 0);
             vRoad.receiveShadow = true; scene.add(vRoad);
+            
+            const vBike1 = new THREE.Mesh(new THREE.PlaneGeometry(1.2, CS), mats.bikeLane);
+            vBike1.rotation.x = -Math.PI/2; vBike1.position.set(roadX - 3.4, 0.009, 0);
+            vBike1.receiveShadow = true; scene.add(vBike1);
+
+            const vBike2 = new THREE.Mesh(new THREE.PlaneGeometry(1.2, CS), mats.bikeLane);
+            vBike2.rotation.x = -Math.PI/2; vBike2.position.set(roadX + 3.4, 0.009, 0);
+            vBike2.receiveShadow = true; scene.add(vBike2);
         }
 
         buildStreetLights(gridBlocks, startOffset, totalSpacing);
@@ -437,7 +451,6 @@
         const sidewalk = new THREE.Mesh(new THREE.BoxGeometry(BS, 0.2, BS), mats.sidewalk);
         sidewalk.position.set(cx, 0.1, cz); sidewalk.receiveShadow = true; scene.add(sidewalk);
 
-        // Bloco Central - ESTUFA BOTÂNICA (Realista, como um Jardim Botânico)
         if (Math.abs(cx) < 5 && Math.abs(cz) < 5) {
             const park = new THREE.Mesh(new THREE.BoxGeometry(BS, 0.25, BS), mats.grass);
             park.position.set(cx, 0.125, cz); park.receiveShadow = true; scene.add(park);
@@ -451,13 +464,11 @@
             dome.position.set(cx, 0.25, cz);
             scene.add(dome);
 
-            // Árvore Gigante Natural (Sem hologramas)
             const giantTree = createDetailedTree();
             giantTree.scale.setScalar(4);
             giantTree.position.set(cx, 0.25, cz);
             scene.add(giantTree);
 
-            // Floresta no interior da cúpula
             for(let t=0; t<20; t++) {
                 const tree = createDetailedTree();
                 const r = 2 + Math.random() * (BS/2 - 4);
@@ -492,7 +503,6 @@
                 const bldg = createArchitecturalBuilding(bw, bd, bh);
                 bldg.position.set(cx + ox, 0.2, cz + oz);
                 scene.add(bldg);
-                // Sem torres 6G com neon flutuante. Foco em arquitetura pé no chão.
             }
         }
     }
@@ -509,7 +519,6 @@
         body.position.y = h/2; body.castShadow = true; body.receiveShadow = true;
         group.add(body);
 
-        // Jardins Verticais realistas
         if (Math.random() > 0.6) {
             const isX = Math.random() > 0.5;
             const gwGeo = new THREE.BoxGeometry(isX ? w+0.4 : w-0.5, h*0.8, isX ? d-0.5 : d+0.4);
@@ -543,7 +552,7 @@
         const group = new THREE.Group();
         const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 1.5, 5), new THREE.MeshStandardMaterial({color: 0x5c4033, roughness: 1.0}));
         trunk.position.y = 0.75; trunk.castShadow = true; group.add(trunk);
-        const leafMat = new THREE.MeshStandardMaterial({color: 0x3a5f0b, roughness: 1.0}); // Verde folha
+        const leafMat = new THREE.MeshStandardMaterial({color: 0x3a5f0b, roughness: 1.0}); 
         const cl1 = new THREE.Mesh(new THREE.SphereGeometry(1.2, 7, 7), leafMat);
         cl1.position.set(0, 2, 0); cl1.castShadow = true; group.add(cl1);
         const cl2 = new THREE.Mesh(new THREE.SphereGeometry(0.9, 7, 7), leafMat);
@@ -584,9 +593,8 @@
         }
     }
 
-    // Monotrilho de Concreto (Transporte Público Moderno e Realista - Substitui Maglev Neon)
     function buildMonorailSystem() {
-        const trackMat = new THREE.MeshStandardMaterial({color: 0xcccccc, roughness: 0.9}); // Concreto
+        const trackMat = new THREE.MeshStandardMaterial({color: 0xcccccc, roughness: 0.9}); 
         const pillarMat = new THREE.MeshStandardMaterial({color: 0xbbbbbb, roughness: 0.9});
 
         for(let x=-150; x<=150; x+=20) {
@@ -608,7 +616,7 @@
         frontLight.position.set(8.05, 1.2, 0); monorailTrain.add(frontLight);
         
         monorailTrain.position.set(-100, 8.8, 0);
-        monorailTrain.userData = { speed: 30, pos: -150 }; // Velocidade mais realista
+        monorailTrain.userData = { speed: 30, pos: -150 }; 
         scene.add(monorailTrain);
     }
 
@@ -632,9 +640,8 @@
 
     function createPedestrian() {
         const group = new THREE.Group();
-        
         const clothingColors = [0xdddddd, 0x444444, 0x334477, 0x773333, 0x226622];
-        const skinColors = [0xffccaa, 0x8d5524, 0xc68642, 0xe0ac69, 0xf1c27d]; // Tons de pele realistas
+        const skinColors = [0xffccaa, 0x8d5524, 0xc68642, 0xe0ac69, 0xf1c27d]; 
         
         const matJacket = new THREE.MeshStandardMaterial({color: clothingColors[Math.floor(Math.random()*clothingColors.length)], roughness: 0.9});
         const matPants = new THREE.MeshStandardMaterial({color: 0x1a1a1a, roughness: 0.9});
@@ -689,6 +696,73 @@
         }
     }
 
+    function createCyclist() {
+        const group = new THREE.Group();
+        
+        // Quadro
+        const frameMat = new THREE.MeshStandardMaterial({color: 0x444444, metalness: 0.8, roughness: 0.2});
+        const frame = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 1.1), frameMat);
+        frame.position.y = 0.5; frame.castShadow = true; group.add(frame);
+        
+        // Rodas (giratórias no eixo X em relação ao modelo)
+        const wheelMat = new THREE.MeshStandardMaterial({color: 0x111111, roughness: 0.9});
+        const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.05, 12);
+        wheelGeo.rotateZ(Math.PI/2);
+        
+        const fw = new THREE.Mesh(wheelGeo, wheelMat);
+        fw.position.set(0, 0.35, -0.6); fw.castShadow = true; group.add(fw);
+        
+        const bw = new THREE.Mesh(wheelGeo, wheelMat);
+        bw.position.set(0, 0.35, 0.6); bw.castShadow = true; group.add(bw);
+
+        // Ciclista
+        const rider = new THREE.Group();
+        const colors = [0x2266cc, 0xcc2222, 0x22cc66, 0xddaa22];
+        const skinColors = [0xffccaa, 0x8d5524, 0xc68642, 0xe0ac69, 0xf1c27d];
+        
+        const matShirt = new THREE.MeshStandardMaterial({color: colors[Math.floor(Math.random()*colors.length)], roughness: 0.9});
+        const matHead = new THREE.MeshStandardMaterial({color: skinColors[Math.floor(Math.random()*skinColors.length)], roughness: 0.8});
+        
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.4, 0.2), matShirt);
+        torso.position.set(0, 0.9, -0.1); torso.rotation.x = -0.3; // Inclinado na bicicleta
+        torso.castShadow = true; rider.add(torso);
+        
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.18), matHead);
+        head.position.set(0, 1.15, -0.2); head.castShadow = true; rider.add(head);
+        
+        group.add(rider);
+        group.userData = { fw, bw };
+        return group;
+    }
+
+    function spawnCyclists() {
+        const lanes = [-3.4, 3.4]; // Posição das ciclovias
+        for (let i = -2; i <= 2; i++) {
+            const roadPos = i * (BS + RW);
+            
+            for(let j=0; j<4; j++) {
+                const c = createCyclist();
+                const lane = lanes[Math.floor(Math.random()*lanes.length)];
+                c.position.set((Math.random()-0.5)*CS, 0, roadPos + lane);
+                c.rotation.y = lane > 0 ? -Math.PI/2 : Math.PI/2;
+                c.userData.speed = 4 + Math.random()*3; 
+                c.userData.axis = 'x'; c.userData.dir = lane > 0 ? -1 : 1; c.userData.limit = CS/2;
+                scene.add(c); cyclists.push(c);
+            }
+            
+            for(let j=0; j<4; j++) {
+                const c = createCyclist();
+                const lane = lanes[Math.floor(Math.random()*lanes.length)];
+                c.position.set(roadPos + lane, 0, (Math.random()-0.5)*CS);
+                c.rotation.y = lane > 0 ? 0 : Math.PI;
+                c.userData.speed = 4 + Math.random()*3;
+                c.userData.axis = 'z'; c.userData.dir = lane > 0 ? -1 : 1; c.userData.limit = CS/2;
+                scene.add(c); cyclists.push(c);
+            }
+        }
+        document.getElementById('valBikes').textContent = cyclists.length;
+    }
+
     function createCarMesh(colorHex) {
         const group = new THREE.Group();
         const bodyMat = new THREE.MeshStandardMaterial({color: colorHex, roughness: 0.3, metalness: 0.5, envMap: envMap, envMapIntensity: 1.0});
@@ -699,7 +773,7 @@
         const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.5, 2.2), cabinMat);
         cabin.position.set(0, 1.05, -0.2); cabin.castShadow = true; group.add(cabin);
         
-        const hlMat = new THREE.MeshStandardMaterial({color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.5}); // Brilho realista
+        const hlMat = new THREE.MeshStandardMaterial({color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.5}); 
         const hlL = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.1), hlMat);
         hlL.position.set(-0.7, 0.5, -2.05); group.add(hlL);
         const hlR = hlL.clone(); hlR.position.set(0.7, 0.5, -2.05); group.add(hlR);
@@ -723,7 +797,7 @@
                 const lane = lanes[Math.floor(Math.random()*lanes.length)];
                 c.position.set((Math.random()-0.5)*CS, 0, roadPos + lane);
                 c.rotation.y = lane > 0 ? -Math.PI/2 : Math.PI/2;
-                c.userData.maxSpeed = 15 + Math.random()*10; // Velocidade urbana realista
+                c.userData.maxSpeed = 15 + Math.random()*10; 
                 c.userData.speed = c.userData.maxSpeed;
                 c.userData.axis = 'x'; c.userData.dir = lane > 0 ? -1 : 1; c.userData.limit = CS/2;
                 scene.add(c); cars.push(c);
@@ -775,6 +849,7 @@
             sl.v.color.setHex(vColor);
         });
 
+        // Carros
         cars.forEach(c => {
             let targetSpeed = c.userData.maxSpeed;
             let approachingRed = false;
@@ -800,7 +875,7 @@
 
             if (approachingRed) {
                 targetSpeed = 0;
-                c.userData.lights[1].emissiveIntensity = 2.0; // Freio
+                c.userData.lights[1].emissiveIntensity = 2.0; 
             } else {
                 c.userData.lights[1].emissiveIntensity = isNight ? 1.0 : 0.0;
             }
@@ -820,6 +895,53 @@
             }
         });
 
+        // Ciclistas (Mesma lógica de andar)
+        cyclists.forEach(c => {
+            let targetSpeed = 6.0; 
+            let approachingRed = false;
+            const spacing = BS + RW; 
+            
+            if (c.userData.axis === 'x') {
+                if (hStop) {
+                    const nextCross = c.userData.dir > 0 
+                        ? Math.ceil((c.position.x + 0.1) / spacing) * spacing 
+                        : Math.floor((c.position.x - 0.1) / spacing) * spacing;
+                    const dist = (nextCross - c.position.x) * c.userData.dir;
+                    if (dist > 2 && dist < 8) approachingRed = true; // Param para freio de bike
+                }
+            } else {
+                if (vStop) {
+                    const nextCross = c.userData.dir > 0 
+                        ? Math.ceil((c.position.z + 0.1) / spacing) * spacing 
+                        : Math.floor((c.position.z - 0.1) / spacing) * spacing;
+                    const dist = (nextCross - c.position.z) * c.userData.dir;
+                    if (dist > 2 && dist < 8) approachingRed = true;
+                }
+            }
+
+            if (approachingRed) targetSpeed = 0;
+            
+            c.userData.speed += (targetSpeed - c.userData.speed) * delta * 4.0;
+            if (c.userData.speed < 0.1) c.userData.speed = 0;
+
+            const move = c.userData.speed * delta * c.userData.dir;
+            if (c.userData.axis === 'x') {
+                c.position.x += move;
+                if(c.position.x > c.userData.limit) c.position.x = -c.userData.limit;
+                if(c.position.x < -c.userData.limit) c.position.x = c.userData.limit;
+            } else {
+                c.position.z += move;
+                if(c.position.z > c.userData.limit) c.position.z = -c.userData.limit;
+                if(c.position.z < -c.userData.limit) c.position.z = c.userData.limit;
+            }
+
+            // Anima as rodas 
+            const wheelRot = (c.userData.speed * delta) / 0.35;
+            c.userData.fw.rotation.x -= wheelRot;
+            c.userData.bw.rotation.x -= wheelRot;
+        });
+
+        // Pedestres
         peds.forEach(p => {
             const move = p.userData.speed * delta * p.userData.dir;
             
@@ -843,7 +965,7 @@
             p.position.y = Math.abs(Math.sin(p.userData.walkCycle * 2)) * 0.05; 
         });
 
-        // Física do Vento nas Árvores
+        // Vento
         leaves.forEach(l => {
             const sway = Math.sin(cityTime * 2 + l.mesh.parent.position.x * 0.1) * 0.1;
             l.mesh.position.x = l.ox + sway;
@@ -907,7 +1029,7 @@
                 scene.fog.color.setHex(0xffaa66);
             } else {
                 sunLight.color.setHex(0xfff5e6);
-                scene.background.setHex(0x87CEEB); // Céu Azul Realista
+                scene.background.setHex(0x87CEEB); 
                 scene.fog.color.setHex(0x87CEEB);
             }
         } else {
