@@ -469,7 +469,7 @@
             vBike2.receiveShadow = true; scene.add(vBike2);
         }
 
-        buildStreetLights(gridBlocks, startOffset, totalSpacing);
+        buildStreetLights(gridBlocks, startOffset, totalSpacing); document.getElementById('valHortas').textContent = hortasCount;
     }
 
 
@@ -658,19 +658,26 @@
                 scene.add(tree);
             }
         } else if (distFromCenter >= 2.5) { 
-            const numHouses = 2 + Math.floor(Math.random() * 4);
-            for(let b=0; b<numHouses; b++) {
-                const house = createHouse();
-                const ox = (Math.random()-0.5)*(BS - 10);
-                const oz = (Math.random()-0.5)*(BS - 10);
-                house.position.set(cx + ox, 0.2, cz + oz);
-                house.rotation.y = Math.floor(Math.random()*4) * (Math.PI/2);
-                scene.add(house);
-                
-                if(Math.random() > 0.4) {
-                    const tree = createDetailedTree();
-                    tree.position.set(cx + ox + 3, 0.25, cz + oz + 3);
-                    scene.add(tree);
+            if (Math.random() > 0.75) {
+                const horta = createCommunityGarden();
+                horta.position.set(cx, 0.1, cz);
+                scene.add(horta);
+                hortasCount++;
+            } else {
+                const numHouses = 2 + Math.floor(Math.random() * 4);
+                for(let b=0; b<numHouses; b++) {
+                    const house = createHouse();
+                    const ox = (Math.random()-0.5)*(BS - 10);
+                    const oz = (Math.random()-0.5)*(BS - 10);
+                    house.position.set(cx + ox, 0.2, cz + oz);
+                    house.rotation.y = Math.floor(Math.random()*4) * (Math.PI/2);
+                    scene.add(house);
+                    
+                    if(Math.random() > 0.4) {
+                        const tree = createDetailedTree();
+                        tree.position.set(cx + ox + 3, 0.25, cz + oz + 3);
+                        scene.add(tree);
+                    }
                 }
             }
         } else {
