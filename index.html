@@ -68,9 +68,9 @@
 
         <div class="stat-group">
             <div class="stat-title">🚘 Mobilidade Urbana</div>
-            <div class="stat-row"><span class="stat-label">Cidadãos na Via</span><span class="stat-value" style="color:#d9480f">150</span></div>
+            <div class="stat-row"><span class="stat-label">Cidadãos na Via</span><span class="stat-value" style="color:#d9480f">450</span></div>
             <div class="stat-row"><span class="stat-label">Ciclistas (Micromobilidade)</span><span class="stat-value" id="valBikes" style="color:#2b8a3e">0</span></div>
-            <div class="stat-row"><span class="stat-label">Carros Elétricos V2X</span><span class="stat-value" id="valCars">45</span></div>
+            <div class="stat-row"><span class="stat-label">Carros Elétricos V2X</span><span class="stat-value" id="valCars">120</span></div>
             <div class="stat-row"><span class="stat-label">Monotrilho / VLT</span><span class="stat-value" style="color:#007799">Operante</span></div>
         </div>
 
@@ -132,7 +132,7 @@
     import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
     import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
-    const CS = 240; const BS = 28; const RW = 8;   
+    const CS = 480; const BS = 28; const RW = 8;   
     
     let scene, camera, renderer, controls, composer;
     let pmremGenerator, envMap;
@@ -411,7 +411,7 @@
         ground.rotation.x = -Math.PI/2; ground.receiveShadow = true;
         scene.add(ground);
 
-        const gridBlocks = 6;
+        const gridBlocks = 10;
         const totalSpacing = BS + RW;
         const startOffset = - (gridBlocks * totalSpacing) / 2 + totalSpacing / 2;
 
@@ -468,6 +468,41 @@
         }
 
         buildStreetLights(gridBlocks, startOffset, totalSpacing);
+    }
+
+
+    function createHouse() {
+        const group = new THREE.Group();
+        const colors = [0xffffff, 0xf0e6d2, 0xe6f0fa, 0xfaf0e6, 0xd2e6d2];
+        const roofColors = [0x8b4513, 0x4a4a4a, 0x3d3d3d, 0x800000];
+        
+        const matWall = new THREE.MeshStandardMaterial({color: colors[Math.floor(Math.random()*colors.length)], roughness: 0.8});
+        const matRoof = new THREE.MeshStandardMaterial({color: roofColors[Math.floor(Math.random()*roofColors.length)], roughness: 0.9});
+        
+        const w = 4 + Math.random()*3;
+        const d = 4 + Math.random()*3;
+        const h = 3 + Math.random()*1.5;
+        
+        const walls = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), matWall);
+        walls.position.y = h/2;
+        walls.castShadow = true; walls.receiveShadow = true;
+        group.add(walls);
+        
+        const radius = Math.max(w, d) * 0.75;
+        const roofHeight = 2 + Math.random()*1.5;
+        const roof = new THREE.Mesh(new THREE.ConeGeometry(radius, roofHeight, 4), matRoof);
+        roof.rotation.y = Math.PI/4;
+        roof.position.y = h + roofHeight/2;
+        roof.castShadow = true;
+        group.add(roof);
+        
+        const solarMat = new THREE.MeshStandardMaterial({color: 0x223355, metalness:0.8, roughness:0.2});
+        const panel = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.1, 2), solarMat);
+        panel.position.set(0, h + roofHeight*0.4, d*0.25);
+        panel.rotation.x = -0.6;
+        group.add(panel);
+        
+        return group;
     }
 
     function buildBlock(cx, cz, i, j) {
@@ -528,6 +563,8 @@
             return;
         }
 
+        const distFromCenter = Math.max(Math.abs(i - 4.5), Math.abs(j - 4.5));
+
         const isPark = Math.random() > 0.85;
         if (isPark) {
             const park = new THREE.Mesh(new THREE.BoxGeometry(BS-2, 0.25, BS-2), mats.grass);
@@ -537,13 +574,29 @@
                 tree.position.set(cx + (Math.random()-0.5)*(BS-4), 0.25, cz + (Math.random()-0.5)*(BS-4));
                 scene.add(tree);
             }
+        } else if (distFromCenter >= 2.5) { 
+            const numHouses = 2 + Math.floor(Math.random() * 4);
+            for(let b=0; b<numHouses; b++) {
+                const house = createHouse();
+                const ox = (Math.random()-0.5)*(BS - 10);
+                const oz = (Math.random()-0.5)*(BS - 10);
+                house.position.set(cx + ox, 0.2, cz + oz);
+                house.rotation.y = Math.floor(Math.random()*4) * (Math.PI/2);
+                scene.add(house);
+                
+                if(Math.random() > 0.4) {
+                    const tree = createDetailedTree();
+                    tree.position.set(cx + ox + 3, 0.25, cz + oz + 3);
+                    scene.add(tree);
+                }
+            }
         } else {
             const numBldgs = 1 + Math.floor(Math.random() * 3);
             for(let b=0; b<numBldgs; b++) {
                 const bw = 6 + Math.random() * 10;
                 const bd = 6 + Math.random() * 10;
                 const distToCenter = Math.sqrt(cx*cx + cz*cz);
-                const maxH = Math.max(15, 80 - distToCenter*0.4);
+                const maxH = Math.max(15, 90 - distToCenter*0.3);
                 const bh = 15 + Math.random() * maxH;
 
                 const ox = (Math.random()-0.5)*(BS - bw - 2);
@@ -562,7 +615,7 @@
     function buildAirport() {
         const airportGroup = new THREE.Group();
         // Posicionado atrás da cidade (fundo Z)
-        airportGroup.position.set(0, 0, -200);
+        airportGroup.position.set(0, 0, -320);
 
         // Pista de Pouso/Decolagem
         const runwayMat = new THREE.MeshStandardMaterial({color: 0x222222, roughness: 0.9});
@@ -627,7 +680,7 @@
         flyingPlane = createAirplane();
         scene.add(flyingPlane);
         // radius 250, height 100
-        flyingPlane.userData = { angle: 0, radius: 240, height: 120, speed: 0.4 };
+        flyingPlane.userData = { angle: 0, radius: 350, height: 160, speed: 0.3 };
     }
 
     function createAirplane() {
@@ -823,12 +876,12 @@
         const trackMat = new THREE.MeshStandardMaterial({color: 0xcccccc, roughness: 0.9}); 
         const pillarMat = new THREE.MeshStandardMaterial({color: 0xbbbbbb, roughness: 0.9});
 
-        for(let x=-150; x<=150; x+=20) {
+        for(let x=-230; x<=230; x+=20) {
             const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.8, 8, 8), pillarMat);
             pillar.position.set(x, 4, 0); pillar.castShadow = true; scene.add(pillar);
         }
 
-        const track = new THREE.Mesh(new THREE.BoxGeometry(300, 0.8, 3), trackMat);
+        const track = new THREE.Mesh(new THREE.BoxGeometry(480, 0.8, 3), trackMat);
         track.position.set(0, 8.4, 0); track.castShadow = true; scene.add(track);
 
         monorailTrain = new THREE.Group();
@@ -842,7 +895,7 @@
         frontLight.position.set(8.05, 1.2, 0); monorailTrain.add(frontLight);
         
         monorailTrain.position.set(-100, 8.8, 0);
-        monorailTrain.userData = { speed: 30, pos: -150 }; 
+        monorailTrain.userData = { speed: 30, pos: -240 }; 
         scene.add(monorailTrain);
     }
 
@@ -898,7 +951,7 @@
     }
 
     function spawnPedestrians() {
-        for (let i = -2; i <= 2; i++) {
+        for (let i = -4; i <= 4; i++) {
             const roadPos = i * (BS + RW);
             const offsets = [RW/2 + 1.2, -RW/2 - 1.2]; 
             
@@ -959,7 +1012,7 @@
 
     function spawnCyclists() {
         const lanes = [-3.4, 3.4]; 
-        for (let i = -2; i <= 2; i++) {
+        for (let i = -4; i <= 4; i++) {
             const roadPos = i * (BS + RW);
             
             for(let j=0; j<4; j++) {
@@ -1012,7 +1065,7 @@
     function spawnCars() {
         const colors = [0xdddddd, 0x111111, 0x991111, 0x1133aa, 0x777777];
         const lanes = [-2, 2];
-        for (let i = -2; i <= 2; i++) {
+        for (let i = -4; i <= 4; i++) {
             const roadPos = i * (BS + RW);
             for(let j=0; j<4; j++) {
                 const c = createCarMesh(colors[Math.floor(Math.random()*colors.length)]);
@@ -1187,7 +1240,7 @@
 
         if(monorailTrain) {
             monorailTrain.userData.pos += monorailTrain.userData.speed * delta;
-            if(monorailTrain.userData.pos > 150) monorailTrain.userData.pos = -150;
+            if(monorailTrain.userData.pos > 240) monorailTrain.userData.pos = -240;
             monorailTrain.position.x = monorailTrain.userData.pos;
         }
 
